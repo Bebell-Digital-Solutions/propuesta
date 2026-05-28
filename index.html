@@ -167,6 +167,21 @@
               opacity: 0;
            }
         }
+
+
+
+/* Fix for iOS momentum scrolling */
+#auth-loader, #onboarding-modal {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure content is properly centered when short */
+#auth-loader .flex-col {
+    min-height: 100%;
+}
+
+
+        
     </style>
 
     <script>
@@ -188,8 +203,9 @@
 </head>
 <body class="h-screen w-full flex bg-mainBg overflow-hidden font-sans text-gray-800">
 
-    <!-- 1. LINK AUTHENTICATION SCREEN -->
-    <div id="auth-loader" class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center p-4 transition-all duration-500">
+<!-- 1. LINK AUTHENTICATION SCREEN -->
+<div id="auth-loader" class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center p-4 transition-all duration-500 overflow-y-auto">
+    <div class="flex flex-col items-center justify-center min-h-[calc(100vh-2rem)]">
         <div id="auth-icon-container" class="relative mb-4 flex items-center justify-center h-[112px] w-[112px]">
             <div class="pulse" id="auth-spinner"></div>
             <i data-lucide="shield-alert" class="w-16 h-16 text-red-500 hidden absolute" id="auth-error-icon"></i>
@@ -198,13 +214,14 @@
         <p id="loader-subtitle" class="text-gray-500 text-sm mt-2" data-i18n="auth_subtitle">Connecting to dashboard database.</p>
         <button id="reset-session-btn" onclick="resetSession()" class="hidden mt-6 text-sm text-indigo-600 hover:text-indigo-800 font-medium underline">Try a different account</button>
     </div>
+</div>
 
     <!-- 2. ONBOARDING MODAL OVERLAY -->
-    <div id="onboarding-modal" class="fixed inset-0 bg-slate-900/80 z-[100] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col relative">
+<div id="onboarding-modal" class="fixed inset-0 bg-slate-900/80 z-[100] hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col relative my-8">
             <div class="h-2 w-full bg-indigo-500 transition-colors duration-500" id="modal-top-bar"></div>
             
-            <button type="button" onclick="toggleAuthLanguage()" class="absolute top-4 right-3 z-10 w-[30px] h-[30px] rounded-full overflow-hidden hover:scale-110 transition-transform shadow-md p-0 border-none bg-transparent cursor-pointer flex items-center justify-center" title="Switch Language">
+            <button type="button" onclick="toggleAuthLanguage()" class="absolute top-8 right-3 z-10 w-[30px] h-[30px] rounded-full overflow-hidden hover:scale-110 transition-transform shadow-md p-0 border-none bg-transparent cursor-pointer flex items-center justify-center" title="Switch Language">
                 <img src="https://bucket.mlcdn.com/a/3336/3336910/images/fc42225f662c5111157fb62dffb9e1ac4bbecfd4.gif" alt="Toggle Language" class="w-full h-full object-cover block">
             </button>
 
