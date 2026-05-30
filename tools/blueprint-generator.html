@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bebell Digital Solutions | Product Blueprint Generator</title>
+    
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Marked.js for rendering Gemini's Markdown response to HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Phosphor Icons for modern UI icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Tailwind Config and CSS -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            500: '#DF1783', // Primary custom color
+                            600: '#be126c',
+                            900: '#831843',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Prose styles for Markdown Rendering - LIGHT MODE */
+        .prose h1 { font-size: 1.875rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: #111827; }
+        .prose h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #1f2937; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+        .prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #334155; }
+        .prose p { margin-bottom: 1rem; line-height: 1.6; color: #475569; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+        .prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+        .prose li { margin-bottom: 0.25rem; }
+        .prose strong { color: #0f172a; font-weight: 600; }
+        .prose blockquote { border-left: 4px solid #DF1783; padding-left: 1rem; color: #64748b; font-style: italic; background-color: #fdf2f8; padding: 0.75rem 1rem; border-radius: 0 0.5rem 0.5rem 0; margin-bottom: 1rem; }
+        .prose code { background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875em; color: #DF1783; }
+        
+        .hide { display: none !important; }
+        
+        /* Loading Animation */
+        .pulse-glow { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(223, 23, 131, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(223, 23, 131, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(223, 23, 131, 0); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            z-index: 50;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen selection:bg-brand-500 selection:text-white font-sans flex flex-col relative">
+
+    <!-- Header Image Banner (Height: 320px) -->
+    <div class="w-full h-[320px] bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop');">
+        <!-- Overlays for brand tint and text readability -->
+        <div class="absolute inset-0 bg-brand-900/40 mix-blend-multiply"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent"></div>
+        
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-8 pt-12 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-xl bg-transparent overflow-hidden flex items-center justify-center p-1">
+                    <img src="https://cdn.shopify.com/s/files/1/0242/0175/6777/files/logo-animation-bebell-1.gif?v=1777437988" 
+                         alt="Bebell Digital Solutions Logo" 
+                         class="w-full h-full object-contain"
+                         onerror="this.onerror=null; this.src='https://placehold.co/100x100/transparent/DF1783?text=BDS';">
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white tracking-tight drop-shadow-md">Bebell Digital Solutions</h1>
+                    <p class="text-brand-50 font-medium drop-shadow-md text-sm">Product Blueprint Generator</p>
+                </div>
+            </div>
+            
+            <!-- User Profile Area (Hidden until logged in) -->
+            <div id="userProfileArea" class="hide flex items-center gap-3">
+                <div class="hidden sm:flex flex-col items-end">
+                    <span id="userName" class="text-sm font-semibold text-white drop-shadow"></span>
+                    <button id="logoutBtn" class="text-xs text-brand-100 hover:text-white transition-colors cursor-pointer focus:outline-none">Sign Out</button>
+                </div>
+                <img id="userAvatar" src="" alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-md">
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container overlapping the banner -->
+    <main class="relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-8 -mt-[160px] mb-16 flex-grow">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col min-h-[500px]">
+            
+            <div class="p-6 sm:p-10 relative h-full flex flex-col" id="mainScrollArea">
+                
+                <!-- Error Banner -->
+                <div id="errorBanner" class="hide mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start gap-3 transition-opacity">
+                    <i class="ph ph-warning-circle text-xl mt-0.5 text-red-500"></i>
+                    <div id="errorMessage" class="text-sm font-medium">An error occurred. Please try again.</div>
+                </div>
+
+                <!-- VIEW 0: LOGIN -->
+                <div id="loginView" class="flex flex-col items-center justify-center flex-grow py-10">
+                    <div class="w-20 h-20 bg-brand-50 rounded-2xl flex items-center justify-center mb-6 text-brand-500">
+                        <i class="ph-fill ph-lock-key text-4xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2 text-center">Authentication Required</h2>
+                    <p class="text-gray-500 text-center mb-8 max-w-sm">Please sign in with your Google account to access the AI Product Blueprint Generator.</p>
+                    
+                    <button id="loginBtn" class="flex items-center gap-3 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-3 px-6 rounded-xl shadow-sm transition-all hover:shadow focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg>
+                        Sign in with Google
+                    </button>
+                </div>
+
+                <!-- VIEW 1: FORM -->
+                <form id="blueprintForm" class="hide space-y-8 transition-opacity duration-300">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700" for="productName">
+                                Product Name <span class="text-brand-500">*</span>
+                            </label>
+                            <input type="text" id="productName" required placeholder="e.g., Nexus CRM" 
+                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700" for="industry">
+                                Industry / Niche <span class="text-gray-400 font-normal text-xs ml-1">(Optional)</span>
+                            </label>
+                            <input type="text" id="industry" placeholder="e.g., Real Estate, Healthcare Tech" 
+                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700" for="targetAudience">
+                            Target Audience <span class="text-brand-500">*</span>
+                        </label>
+                        <textarea id="targetAudience" required rows="2" placeholder="Describe the ideal users (e.g., Marketing agencies with 10-50 employees struggling with content approval)." 
+                            class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm resize-none"></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700" for="mainFunctionality">
+                            Main Functionality <span class="text-brand-500">*</span>
+                        </label>
+                        <textarea id="mainFunctionality" required rows="3" placeholder="What does the product do? What are its primary features and use cases?" 
+                            class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm resize-none"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700" for="pricingModel">
+                                Pricing Model <span class="text-gray-400 font-normal text-xs ml-1">(Optional)</span>
+                            </label>
+                            <input type="text" id="pricingModel" placeholder="e.g., SaaS Freemium, $29/mo" 
+                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm">
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700" for="optionalNotes">
+                                Additional Notes <span class="text-gray-400 font-normal text-xs ml-1">(Optional)</span>
+                            </label>
+                            <input type="text" id="optionalNotes" placeholder="Any specific requirements or tone?" 
+                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <label class="block text-sm font-semibold text-gray-700" for="sourceCode">
+                                Source Code / Architecture Data <span class="text-brand-500">*</span>
+                            </label>
+                            <span class="text-xs text-gray-500">Paste code, JSON, or technical specs</span>
+                        </div>
+                        <textarea id="sourceCode" required rows="6" placeholder="Paste your frontend/backend code, database schema, or technical architecture here for analysis..." 
+                            class="w-full font-mono text-sm bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm resize-y"></textarea>
+                    </div>
+
+                    <!-- Submit Action -->
+                    <div class="pt-6 flex justify-end border-t border-gray-100">
+                        <button type="submit" id="submitBtn" class="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+                            Generate Blueprint
+                            <i class="ph ph-magic-wand text-xl"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- VIEW 2: LOADING -->
+                <div id="loadingView" class="hide flex flex-col items-center justify-center py-20 min-h-[400px]">
+                    <div class="relative w-24 h-24 mb-8">
+                        <div class="absolute inset-0 rounded-full border-t-4 border-brand-500 animate-spin opacity-80"></div>
+                        <div class="absolute inset-2 rounded-full border-r-4 border-brand-200 animate-spin opacity-60" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                        <div class="absolute inset-0 flex items-center justify-center text-brand-500 pulse-glow rounded-full bg-brand-50/50">
+                            <i class="ph-fill ph-brain text-4xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Analyzing Architecture</h3>
+                    <p id="loadingStatus" class="text-gray-500 text-sm animate-pulse font-medium">Parsing source code and identifying workflows...</p>
+                    
+                    <div class="w-full max-w-sm mt-10 space-y-4">
+                        <div class="flex items-center gap-3 text-sm font-medium text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100" id="step1">
+                            <i class="ph-fill ph-check-circle text-brand-500 text-lg opacity-0 transition-opacity" id="step1Icon"></i>
+                            <span>Ingesting context parameters</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm font-medium text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100" id="step2">
+                            <i class="ph-fill ph-check-circle text-brand-500 text-lg opacity-0 transition-opacity" id="step2Icon"></i>
+                            <span>Synthesizing business value</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm font-medium text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100" id="step3">
+                            <i class="ph-fill ph-check-circle text-brand-500 text-lg opacity-0 transition-opacity" id="step3Icon"></i>
+                            <span>Drafting technical specifications</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 3: RESULT -->
+                <div id="resultView" class="hide flex flex-col h-full">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-brand-50 p-5 rounded-xl border border-brand-100">
+                        <div class="flex items-center gap-3 text-brand-600 font-bold text-lg">
+                            <i class="ph-fill ph-check-circle text-2xl"></i>
+                            Blueprint Generated
+                        </div>
+                        <div class="flex gap-3 w-full sm:w-auto">
+                            <button id="copyBtn" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold py-2.5 px-5 rounded-lg shadow-sm transition-all border border-gray-200 hover:border-gray-300">
+                                <i class="ph ph-copy text-lg"></i> Copy Markdown
+                            </button>
+                            <button id="resetBtn" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-red-50 text-red-600 text-sm font-semibold py-2.5 px-5 rounded-lg shadow-sm transition-all border border-gray-200 hover:border-red-200">
+                                <i class="ph ph-arrow-counter-clockwise text-lg"></i> Start Over
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="markdownOutput" class="prose max-w-none bg-white p-2 sm:p-4">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="toast flex items-center gap-2">
+        <i class="ph-fill ph-check-circle text-xl"></i>
+        <span id="toastMsg">Copied to clipboard!</span>
+    </div>
+
+    <!-- Firebase SDK (Modular v11) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // =====================================================================
+        // 1. CONFIGURATION & STATE
+        // =====================================================================
+        
+        // Use environment Firebase Config if available, otherwise dummy fallback
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : { apiKey: "dummy", authDomain: "dummy.firebaseapp.com", projectId: "dummy" };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+        
+        // Native Gemini API setup
+        const apiKey = ""; // API key is injected at runtime in this environment
+
+        // Global State
+        let currentUser = null;
+        let rawMarkdownContent = "";
+
+        // =====================================================================
+        // 2. DOM ELEMENTS
+        // =====================================================================
+        const views = {
+            login: document.getElementById('loginView'),
+            form: document.getElementById('blueprintForm'),
+            loading: document.getElementById('loadingView'),
+            result: document.getElementById('resultView'),
+        };
+        const errorBanner = document.getElementById('errorBanner');
+        const errorMessage = document.getElementById('errorMessage');
+        const mainScrollArea = document.getElementById('mainScrollArea');
+        const userProfileArea = document.getElementById('userProfileArea');
+        const userNameEl = document.getElementById('userName');
+        const userAvatarEl = document.getElementById('userAvatar');
+        
+        // Buttons
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // =====================================================================
+        // 3. AUTHENTICATION LOGIC
+        // =====================================================================
+        
+        // Listen for Auth State Changes
+        onAuthStateChanged(auth, (user) => {
+            if (user && !user.isAnonymous) { // Require real Google login for this app
+                currentUser = user;
+                // Update UI Profile
+                userNameEl.textContent = user.displayName || "User";
+                userAvatarEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=DF1783&color=fff`;
+                userProfileArea.classList.remove('hide');
+                
+                // Show Form
+                switchView('form');
+            } else {
+                currentUser = null;
+                userProfileArea.classList.add('hide');
+                switchView('login');
+            }
+        });
+
+        // Login Handler
+        loginBtn.addEventListener('click', async () => {
+            try {
+                errorBanner.classList.add('hide');
+                loginBtn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i> Connecting...`;
+                loginBtn.disabled = true;
+                
+                await signInWithPopup(auth, provider);
+                // The onAuthStateChanged listener handles the UI update automatically
+            } catch (error) {
+                console.error("Login Error:", error);
+                showError("Authentication failed. Please try again.");
+                loginBtn.innerHTML = `<svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg> Sign in with Google`;
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Logout Handler
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // =====================================================================
+        // 4. GEMINI API INTEGRATION (Serverless Direct Connection)
+        // =====================================================================
+        
+        const SYSTEM_INSTRUCTION = `You are a Senior Product Manager, Technical Writer, UX Analyst, Software Architect, SaaS Consultant, and Marketing Strategist.
+Your task is to analyze the information provided and generate a complete Digital Product Blueprint for the software product.
+The objective is to create professional documentation suitable for:
+Product catalogs, SaaS directories, Sales presentations, Investor presentations, Internal documentation, Product launch pages, Marketing materials, Technical overviews.
+
+ANALYSIS REQUIREMENTS
+Before generating the documentation:
+- Analyze the source code structure.
+- Identify all major features, workflows, entities, data relationships, views, integrations, storage, automation, and responsive design features.
+- Infer business use cases from the functionality and architecture.
+- Write as if the product already exists and is ready for market. Use clear, professional language.
+- Avoid hype, exaggerated marketing claims, or generic buzzwords. Focus on practical business value.
+
+OUTPUT FORMAT (Must use Markdown)
+Generate the following sections:
+1. PRODUCT IDENTITY (Name, Tagline, Category, Subcategory, Type, Version, Short Description)
+2. EXECUTIVE SUMMARY
+3. CORE VALUE PROPOSITION
+4. TARGET AUDIENCE
+5. PRIMARY USE CASES (Scenario, User Type, Business Benefit)
+6. KEY FEATURES & CAPABILITIES
+7. USER INTERFACE OVERVIEW
+8. WORKSPACE VIEWS
+9. DATA ARCHITECTURE
+10. USER WORKFLOW
+11. AUTOMATION FEATURES
+12. CUSTOMIZATION OPTIONS
+13. INTEGRATIONS & CONNECTIVITY
+14. TECHNICAL SPECIFICATIONS
+15. DESIGN SYSTEM
+16. COMPETITIVE ADVANTAGES
+17. BUSINESS BENEFITS
+18. FUTURE EXPANSION OPPORTUNITIES
+19. PRODUCT POSITIONING STATEMENT
+20. PRODUCT SNAPSHOT (Summary table)
+
+Do not output analysis notes. Output ONLY the final Digital Product Blueprint in Markdown.`;
+
+        async function fetchFromGemini(userData) {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            // Format the user prompt clearly based on the form inputs
+            const userPrompt = `
+INPUTS:
+Product Name: ${userData.productName}
+Main Functionality: ${userData.mainFunctionality}
+Target Audience: ${userData.targetAudience}
+Industry/Niche: ${userData.industry}
+Pricing Model: ${userData.pricingModel}
+Additional Notes: ${userData.optionalNotes}
+
+Source Code/Architecture:
+\`\`\`
+${userData.sourceCode}
+\`\`\`
+`;
+
+            const payload = {
+                systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+                contents: [{ parts: [{ text: userPrompt }] }]
+            };
+
+            // Implement Exponential Backoff for API stability
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            
+            for (let attempt = 0; attempt < 6; attempt++) {
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                    
+                    const data = await response.json();
+                    
+                    if (data.candidates && data.candidates[0].content) {
+                        return data.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("Invalid response structure from Gemini API");
+                    }
+
+                } catch (error) {
+                    if (attempt === 5) { // If all retries fail
+                        throw new Error("Failed to generate blueprint. Please check your connection and try again.");
+                    }
+                    // Wait before retrying
+                    await new Promise(res => setTimeout(res, delays[attempt]));
+                }
+            }
+        }
+
+        // =====================================================================
+        // 5. FORM SUBMISSION & UI STATE
+        // =====================================================================
+        
+        views.form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorBanner.classList.add('hide');
+
+            const formData = {
+                productName: document.getElementById('productName').value.trim(),
+                industry: document.getElementById('industry').value.trim() || 'Not specified',
+                targetAudience: document.getElementById('targetAudience').value.trim(),
+                mainFunctionality: document.getElementById('mainFunctionality').value.trim(),
+                pricingModel: document.getElementById('pricingModel').value.trim() || 'Not specified',
+                optionalNotes: document.getElementById('optionalNotes').value.trim() || 'None',
+                sourceCode: document.getElementById('sourceCode').value.trim(),
+            };
+
+            switchView('loading');
+            simulateLoadingProgress(); 
+
+            try {
+                // Call Gemini Directly
+                const aiResponse = await fetchFromGemini(formData);
+                
+                // Render Output
+                rawMarkdownContent = aiResponse;
+                document.getElementById('markdownOutput').innerHTML = marked.parse(aiResponse);
+                switchView('result');
+
+            } catch (error) {
+                console.error("Generation Error:", error);
+                showError(error.message);
+                switchView('form'); 
+            }
+        });
+
+        // =====================================================================
+        // 6. HELPER FUNCTIONS & EVENT LISTENERS
+        // =====================================================================
+        
+        function switchView(viewName) {
+            Object.values(views).forEach(v => v.classList.add('hide'));
+            if (views[viewName]) {
+                views[viewName].classList.remove('hide');
+                if (viewName === 'result') mainScrollArea.scrollTop = 0;
+            }
+        }
+
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorBanner.classList.remove('hide');
+        }
+
+        function simulateLoadingProgress() {
+            const icons = [document.getElementById('step1Icon'), document.getElementById('step2Icon'), document.getElementById('step3Icon')];
+            const statusEl = document.getElementById('loadingStatus');
+            const statusTexts = [
+                "Parsing source code and identifying workflows...",
+                "Mapping architecture and evaluating logic...",
+                "Synthesizing business value and use cases...",
+                "Drafting final markdown documentation..."
+            ];
+            
+            icons.forEach(i => { i.classList.remove('opacity-100'); i.classList.add('opacity-0'); });
+            
+            setTimeout(() => { icons[0].classList.replace('opacity-0', 'opacity-100'); statusEl.innerText = statusTexts[1]; }, 1500);
+            setTimeout(() => { icons[1].classList.replace('opacity-0', 'opacity-100'); statusEl.innerText = statusTexts[2]; }, 3500);
+            setTimeout(() => { icons[2].classList.replace('opacity-0', 'opacity-100'); statusEl.innerText = statusTexts[3]; }, 6000);
+        }
+
+        // Copy and Reset Listeners
+        copyBtn.addEventListener('click', () => {
+            const toast = document.getElementById('toast');
+            
+            // Try modern clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(rawMarkdownContent).then(() => showToast()).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
+
+            function fallbackCopy() {
+                const textArea = document.createElement("textarea");
+                textArea.value = rawMarkdownContent;
+                textArea.style.position = "fixed";  // Avoid scrolling to bottom
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast();
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                }
+                document.body.removeChild(textArea);
+            }
+
+            function showToast() {
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="ph-fill ph-check"></i> Copied!';
+                copyBtn.classList.add('text-green-600', 'border-green-300', 'bg-green-50');
+                
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.classList.remove('text-green-600', 'border-green-300', 'bg-green-50');
+                    toast.classList.remove('show');
+                }, 2500);
+            }
+        });
+
+        resetBtn.addEventListener('click', () => switchView('form'));
+
+    </script>
+</body>
+</html>
