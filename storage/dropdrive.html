@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveDrop</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons for modern, clean iconography -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- SortableJS for smooth drag-and-drop visual reordering -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for a polished look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .drag-active {
+            border: 2px dashed #22c55e !important;
+            background-color: rgba(34, 197, 94, 0.05) !important;
+        }
+
+        /* Loading spinner animation */
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #22c55e;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Toast animation */
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-exit { animation: slideOut 0.3s ease-in forwards; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex selection:bg-primary-100 selection:text-primary-700">
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 z-20 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 z-30 transform -translate-x-full lg:translate-x-0">
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2 text-primary-600 font-bold text-xl tracking-tight">
+                <i class="ph-fill ph-cloud-arrow-up text-2xl"></i>
+                DriveDrop
+            </div>
+            <button class="lg:hidden text-slate-500 hover:text-slate-700" onclick="toggleSidebar()">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+        </div>
+
+        <div class="p-4 flex-1 overflow-y-auto">
+            <button onclick="showCreateFolderModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors mb-6 shadow-sm">
+                <i class="ph ph-plus-circle text-lg"></i>
+                New Folder
+            </button>
+
+            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-2">My Drive</div>
+            <ul id="folder-tree" class="space-y-1">
+                <!-- Folders injected here via JS -->
+            </ul>
+        </div>
+        
+        <div class="p-4 border-t border-slate-100">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <p class="text-xs text-slate-500 mb-2">Connected to Apps Script</p>
+                <button onclick="showSettingsModal()" class="text-sm text-slate-700 hover:text-primary-600 font-medium flex items-center gap-1 transition-colors">
+                    <i class="ph ph-plugs"></i> Settings
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative" id="drop-zone">
+        
+        <!-- Top Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 shrink-0">
+            <div class="flex items-center gap-3">
+                <button class="lg:hidden text-slate-500 hover:text-slate-700 p-1" onclick="toggleSidebar()">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+                
+                <!-- Search Bar -->
+                <div class="relative hidden sm:block">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="search-input" placeholder="Search files..." class="w-64 bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all outline-none">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 sm:gap-4">
+                <!-- System Status Badge -->
+                <div id="system-status" class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 transition-colors" title="System Offline">
+                    <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-red-500 transition-colors duration-300"></div>
+                    <span id="status-text" class="text-xs font-semibold text-slate-600 hidden md:block">Offline (Demo)</span>
+                </div>
+
+                <div class="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+                <input type="file" id="file-upload-input" multiple class="hidden" onchange="handleFileSelect(event)">
+                <button onclick="document.getElementById('file-upload-input').click()" class="bg-primary-500 hover:bg-primary-600 text-white p-2 sm:px-4 sm:py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition-colors shadow-sm">
+                    <i class="ph ph-upload-simple text-lg"></i>
+                    <span class="hidden sm:inline">Upload</span>
+                </button>
+                <button onclick="loadCurrentFolder()" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors" title="Refresh">
+                    <i class="ph ph-arrows-clockwise text-xl"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Breadcrumbs & View Toggle -->
+        <div class="px-4 lg:px-8 py-3 border-b border-slate-100 bg-white shrink-0 flex items-center justify-between">
+            <nav class="flex items-center gap-2 text-sm text-slate-500 overflow-x-auto whitespace-nowrap hide-scrollbar" id="breadcrumbs">
+                <!-- Breadcrumbs injected via JS -->
+            </nav>
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg shrink-0 ml-4">
+                <button onclick="setViewMode('grid')" id="btn-view-grid" class="p-1.5 rounded bg-white text-primary-600 shadow-sm transition-all" title="Grid View">
+                    <i class="ph-fill ph-grid-four text-lg"></i>
+                </button>
+                <button onclick="setViewMode('list')" id="btn-view-list" class="p-1.5 rounded text-slate-400 hover:text-slate-600 transition-all" title="List View">
+                    <i class="ph-fill ph-list-dashes text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Files Area -->
+        <div class="flex-1 overflow-y-auto p-4 lg:p-8 relative" id="files-container">
+            <!-- Empty State (Hidden by default) -->
+            <div id="empty-state" class="hidden flex-col items-center justify-center h-full text-slate-400">
+                <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="ph ph-folder-open text-4xl text-slate-300"></i>
+                </div>
+                <h3 class="text-lg font-medium text-slate-700 mb-1">This folder is empty</h3>
+                <p class="text-sm">Drag and drop files here to upload</p>
+            </div>
+
+            <!-- Folders Grid -->
+            <div class="mb-8">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4" id="folders-title">Folders</h3>
+                <div id="folders-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <!-- Folders injected via JS -->
+                </div>
+            </div>
+
+            <!-- Files Grid -->
+            <div>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4" id="files-title">Files</h3>
+                <div id="files-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    <!-- Files injected via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Drag Overlay -->
+        <div id="drag-overlay" class="absolute inset-0 bg-primary-500/90 flex-col items-center justify-center text-white z-40 hidden backdrop-blur-sm rounded-xl m-4 border-4 border-dashed border-white">
+            <i class="ph-fill ph-file-arrow-up text-6xl mb-4 animate-bounce"></i>
+            <h2 class="text-2xl font-bold">Drop files to upload</h2>
+            <p class="opacity-80 mt-2 text-center max-w-sm">Files will be uploaded directly to your Google Drive in the current folder.</p>
+        </div>
+    </main>
+
+    <!-- Setup / Settings Modal -->
+    <div id="setup-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden overflow-y-auto pt-10 pb-10">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl m-4 transform transition-all flex flex-col">
+            
+            <!-- Modal Header with Tabs -->
+            <div class="px-6 pt-6 pb-0 border-b border-slate-100">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
+                            <i class="ph-fill ph-link text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">Bring Your Own Backend</h2>
+                    </div>
+                    <button onclick="closeSetupModal()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-full p-1.5 transition-colors">
+                        <i class="ph ph-x text-lg"></i>
+                    </button>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="flex gap-6 mt-4">
+                    <button onclick="switchSetupTab('connect')" id="tab-btn-connect" class="px-2 py-3 text-sm font-semibold border-b-2 border-primary-500 text-primary-600 transition-colors">Connect URL</button>
+                    <button onclick="switchSetupTab('instructions')" id="tab-btn-instructions" class="px-2 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors">Setup Instructions</button>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto max-h-[70vh]">
+                <!-- Connect Tab Content -->
+                <div id="tab-content-connect" class="block animate-[slideIn_0.2s_ease-out]">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-start gap-3 mb-6">
+                        <i class="ph-fill ph-info text-indigo-500 text-xl mt-0.5 shrink-0"></i>
+                        <p class="text-sm text-indigo-900">DriveDrop runs locally on your browser. To manage files, deploy a simple script in your Google Account. <strong>Your data never leaves your device except directly to your Google Drive.</strong></p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Web App URL</label>
+                        <input type="text" id="gas-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all font-mono">
+                    </div>
+                    
+                    <div class="flex gap-3 justify-end mt-8">
+                        <button onclick="closeSetupModal()" id="btn-setup-cancel" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors">Skip for now</button>
+                        <button onclick="saveGasUrl()" id="btn-setup-connect" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                            <span>Save Key & Connect</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Instructions Tab Content -->
+                <div id="tab-content-instructions" class="hidden animate-[slideIn_0.2s_ease-out]">
+                    
+                    <!-- Step 1 -->
+                    <div class="flex items-start gap-4 mb-8">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold shrink-0 mt-0.5">1</div>
+                        <div class="flex-1 overflow-hidden">
+                            <h3 class="text-lg font-bold text-slate-800 mb-2">Create the Script</h3>
+                            <p class="text-sm text-slate-600 mb-3">Open <a href="https://script.google.com/" target="_blank" class="text-primary-600 hover:underline font-medium">Google Apps Script</a> and create a <strong>New Project</strong>. Delete the default code and paste the following snippet:</p>
+                            
+                            <div class="relative bg-[#1e293b] rounded-xl overflow-hidden shadow-inner border border-slate-700">
+                                <div class="absolute top-2 right-2 flex items-center gap-2">
+                                    <span id="copy-feedback" class="text-xs text-green-400 font-medium opacity-0 transition-opacity">Copied!</span>
+                                    <button onclick="copyScriptCode()" class="bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 backdrop-blur-sm border border-white/10">
+                                        <i class="ph ph-copy"></i> Copy Code
+                                    </button>
+                                </div>
+                                <!-- Script Code block -->
+                                <textarea id="raw-script-code" class="hidden">
+/**
+ * DriveDrop Backend API
+ * Deploy as a Web App: 
+ * - Execute as: Me
+ * - Who has access: Anyone
+ */
+
+function doGet(e) { return handleRequest(e); }
+function doPost(e) { return handleRequest(e); }
+
+function handleRequest(e) {
+  const output = ContentService.createTextOutput();
+  output.setMimeType(ContentService.MimeType.JSON);
+  try {
+    let params = e.parameter;
+    if (e.postData && e.postData.contents) {
+      try { params = Object.assign(params, JSON.parse(e.postData.contents)); } catch (ex) {}
+    }
+    const action = params.action;
+    let result = {};
+    switch (action) {
+      case 'test': result = { status: 'success', message: 'API is connected.' }; break;
+      case 'list': result = listContents(params.folderId || 'root'); break;
+      case 'createFolder': result = createNewFolder(params.folderName, params.parentId || 'root'); break;
+      case 'rename': result = renameItem(params.id, params.newName, params.type); break;
+      case 'move': result = moveItem(params.id, params.targetFolderId, params.type); break;
+      case 'upload': result = uploadFile(params.data, params.filename, params.mimeType, params.parentId || 'root'); break;
+      case 'delete': result = deleteItem(params.id); break;
+      default: result = { error: 'Invalid or missing action parameter.' };
+    }
+    output.setContent(JSON.stringify(result));
+    return output;
+  } catch (error) {
+    output.setContent(JSON.stringify({ error: error.toString() }));
+    return output;
+  }
+}
+
+function listContents(folderId) {
+  const folder = folderId === 'root' ? DriveApp.getRootFolder() : DriveApp.getFolderById(folderId);
+  const result = { folders: [], files: [] };
+  const folderIter = folder.getFolders();
+  while (folderIter.hasNext()) { const f = folderIter.next(); if (!f.isTrashed()) result.folders.push({ id: f.getId(), name: f.getName() }); }
+  const fileIter = folder.getFiles();
+  while (fileIter.hasNext()) { const f = fileIter.next(); if (!f.isTrashed()) result.files.push({ id: f.getId(), name: f.getName(), mimeType: f.getMimeType(), size: f.getSize(), url: f.getUrl() }); }
+  return result;
+}
+
+function createNewFolder(name, parentId) {
+  const folder = parentId === 'root' ? DriveApp.getRootFolder() : DriveApp.getFolderById(parentId);
+  const newFolder = folder.createFolder(name);
+  return { status: 'success', folder: { id: newFolder.getId(), name: newFolder.getName() } };
+}
+
+function renameItem(id, newName, type) {
+  if (type === 'file') DriveApp.getFileById(id).setName(newName);
+  else DriveApp.getFolderById(id).setName(newName);
+  return { status: 'success' };
+}
+
+function moveItem(id, targetFolderId, type) {
+  const target = targetFolderId === 'root' ? DriveApp.getRootFolder() : DriveApp.getFolderById(targetFolderId);
+  if (type === 'file') DriveApp.getFileById(id).moveTo(target);
+  else DriveApp.getFolderById(id).moveTo(target);
+  return { status: 'success' };
+}
+
+function uploadFile(base64Data, filename, mimeType, parentId) {
+  const decoded = Utilities.base64Decode(base64Data);
+  const blob = Utilities.newBlob(decoded, mimeType, filename);
+  const folder = parentId === 'root' ? DriveApp.getRootFolder() : DriveApp.getFolderById(parentId);
+  const file = folder.createFile(blob);
+  return { status: 'success', file: { id: file.getId(), name: file.getName(), url: file.getUrl() } };
+}
+
+function deleteItem(id) {
+  try { DriveApp.getFileById(id).setTrashed(true); return { status: 'success', type: 'file' }; } catch(e) {
+    DriveApp.getFolderById(id).setTrashed(true); return { status: 'success', type: 'folder' };
+  }
+}</textarea>
+                                <pre class="p-4 pt-10 overflow-x-auto text-xs sm:text-sm text-green-300 font-mono leading-relaxed max-h-64 overflow-y-auto custom-scrollbar-dark"><code id="display-script-code"></code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex items-start gap-4 mb-8">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold shrink-0 mt-0.5">2</div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 mb-3">Deploy as Web App</h3>
+                            <ol class="list-decimal list-inside text-sm text-slate-600 space-y-2 font-medium">
+                                <li>Click <strong class="text-slate-800">Deploy</strong> > <strong class="text-slate-800">New deployment</strong>.</li>
+                                <li>Select type <strong class="text-slate-800">Web app</strong>.</li>
+                                <li>Set "Execute as" to <strong class="text-slate-800">Me</strong>.</li>
+                                <li>Set "Who has access" to <strong class="text-slate-800">Anyone</strong>.</li>
+                                <li>Click <strong class="text-slate-800">Deploy</strong>, authorize access if asked, and copy the <strong class="text-slate-800">Web app URL</strong>.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold shrink-0 mt-0.5">3</div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-slate-800 mb-2">Connect DriveDrop</h3>
+                            <p class="text-sm text-slate-600 mb-4">Go back to the <strong>Connect URL</strong> tab and paste your new Web app URL.</p>
+                            <button onclick="switchSetupTab('connect')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                                <i class="ph ph-arrow-left"></i> Back to Connect
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Folder Modal -->
+    <div id="create-folder-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 m-4">
+            <h2 class="text-lg font-bold text-slate-800 mb-4">New Folder</h2>
+            <input type="text" id="new-folder-name" placeholder="Folder name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all mb-6">
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeModal('create-folder-modal')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors">Cancel</button>
+                <button onclick="executeCreateFolder()" class="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="rename-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 m-4">
+            <h2 class="text-lg font-bold text-slate-800 mb-4" id="rename-title">Rename Item</h2>
+            <input type="text" id="rename-input" placeholder="New name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all mb-6">
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeModal('rename-modal')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors">Cancel</button>
+                <button onclick="executeRename()" class="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 m-4 text-center">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ph ph-warning text-2xl"></i>
+            </div>
+            <h2 class="text-lg font-bold text-slate-800 mb-2" id="confirm-title">Are you sure?</h2>
+            <p class="text-sm text-slate-500 mb-6" id="confirm-text">This action cannot be undone.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeModal('confirm-modal')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors w-full">Cancel</button>
+                <button id="confirm-action-btn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors w-full">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Loading Overlay -->
+    <div id="global-loader" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[60] flex flex-col items-center justify-center hidden">
+        <div class="w-10 h-10 spinner mb-4 border-t-primary-500 border-slate-200"></div>
+        <p class="text-sm font-medium text-slate-600" id="loader-text">Loading...</p>
+    </div>
+
+    <!-- Toasts Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-[70] flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // --- State Management ---
+        const State = {
+            gasUrl: localStorage.getItem('drivedrop_url') || '',
+            currentFolder: 'root',
+            path: [{ id: 'root', name: 'My Drive' }],
+            folders: [],
+            files: [],
+            isSidebarOpen: false,
+            viewMode: 'grid',
+            sortableInstances: []
+        };
+
+        // --- DOM Elements ---
+        const DOM = {
+            setupModal: document.getElementById('setup-modal'),
+            gasUrlInput: document.getElementById('gas-url-input'),
+            btnSetupCancel: document.getElementById('btn-setup-cancel'),
+            loader: document.getElementById('global-loader'),
+            loaderText: document.getElementById('loader-text'),
+            toastContainer: document.getElementById('toast-container'),
+            foldersGrid: document.getElementById('folders-grid'),
+            filesGrid: document.getElementById('files-grid'),
+            breadcrumbs: document.getElementById('breadcrumbs'),
+            folderTree: document.getElementById('folder-tree'),
+            emptyState: document.getElementById('empty-state'),
+            foldersTitle: document.getElementById('folders-title'),
+            filesTitle: document.getElementById('files-title'),
+            searchInput: document.getElementById('search-input'),
+            sidebar: document.getElementById('sidebar'),
+            mobileOverlay: document.getElementById('mobile-overlay'),
+            dropZone: document.getElementById('drop-zone'),
+            dragOverlay: document.getElementById('drag-overlay')
+        };
+
+        // --- Initialization ---
+        function init() {
+            // Load snippet into display area
+            document.getElementById('display-script-code').textContent = document.getElementById('raw-script-code').value;
+
+            if (!State.gasUrl) {
+                DOM.setupModal.classList.remove('hidden');
+                updateSystemStatus('disconnected');
+            } else {
+                updateSystemStatus('connected');
+                loadCurrentFolder();
+            }
+            setupEventListeners();
+        }
+
+        // --- STREAMING_CHUNK:System Status & UI Updates ---
+
+        function updateSystemStatus(state) {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            const container = document.getElementById('system-status');
+
+            // Reset animation
+            dot.classList.remove('animate-pulse');
+
+            if (state === 'connected') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] transition-colors duration-300';
+                text.textContent = 'Operational';
+                text.className = 'text-xs font-semibold text-green-700 hidden md:block';
+                container.className = 'flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-200 transition-colors';
+                container.title = 'Connected to Google Drive';
+            } else if (state === 'processing') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse transition-colors duration-300';
+                text.textContent = 'Processing...';
+                text.className = 'text-xs font-semibold text-yellow-700 hidden md:block';
+                container.className = 'flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-full border border-yellow-200 transition-colors';
+                container.title = 'Waiting for response';
+            } else {
+                // disconnected / demo
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-red-500 transition-colors duration-300';
+                text.textContent = 'Offline (Demo)';
+                text.className = 'text-xs font-semibold text-red-700 hidden md:block';
+                container.className = 'flex items-center gap-2 bg-red-50 px-3 py-1.5 rounded-full border border-red-200 transition-colors';
+                container.title = 'Not connected to API';
+            }
+        }
+
+        function switchSetupTab(tabId) {
+            const connectBtn = document.getElementById('tab-btn-connect');
+            const instructionsBtn = document.getElementById('tab-btn-instructions');
+            const connectContent = document.getElementById('tab-content-connect');
+            const instructionsContent = document.getElementById('tab-content-instructions');
+
+            if (tabId === 'connect') {
+                connectBtn.className = "px-2 py-3 text-sm font-semibold border-b-2 border-primary-500 text-primary-600 transition-colors";
+                instructionsBtn.className = "px-2 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors";
+                connectContent.classList.remove('hidden');
+                instructionsContent.classList.add('hidden');
+            } else {
+                instructionsBtn.className = "px-2 py-3 text-sm font-semibold border-b-2 border-primary-500 text-primary-600 transition-colors";
+                connectBtn.className = "px-2 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors";
+                instructionsContent.classList.remove('hidden');
+                connectContent.classList.add('hidden');
+            }
+        }
+
+        function copyScriptCode() {
+            const code = document.getElementById('raw-script-code').value;
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = code;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                document.execCommand('copy');
+                const feedback = document.getElementById('copy-feedback');
+                feedback.classList.remove('opacity-0');
+                setTimeout(() => feedback.classList.add('opacity-0'), 2000);
+            } catch (err) {
+                console.error('Failed to copy', err);
+                showToast('Failed to copy code.', 'error');
+            }
+            
+            document.body.removeChild(tempTextArea);
+        }
+
+        function triggerConfetti() {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            // Search filter
+            DOM.searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                renderItems(query);
+            });
+
+            // Detect if dragged item is a file from the OS
+            function isOSFileDrag(e) {
+                return e.dataTransfer.types && (e.dataTransfer.types.includes("Files") || e.dataTransfer.types.includes("application/x-moz-file"));
+            }
+
+            // Drag and Drop (External Files)
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            let dragCounter = 0;
+            document.body.addEventListener('dragenter', (e) => {
+                if (!isOSFileDrag(e)) return; // Ignore internal element dragging
+                dragCounter++;
+                DOM.dragOverlay.classList.remove('hidden');
+                DOM.dragOverlay.classList.add('flex');
+            });
+            document.body.addEventListener('dragleave', (e) => {
+                if (!isOSFileDrag(e)) return;
+                dragCounter--;
+                if (dragCounter === 0) {
+                    DOM.dragOverlay.classList.add('hidden');
+                    DOM.dragOverlay.classList.remove('flex');
+                }
+            });
+            document.body.addEventListener('drop', handleDrop, false);
+        }
+
+        function toggleSidebar() {
+            State.isSidebarOpen = !State.isSidebarOpen;
+            if (State.isSidebarOpen) {
+                DOM.sidebar.classList.remove('-translate-x-full');
+                DOM.mobileOverlay.classList.remove('hidden');
+            } else {
+                DOM.sidebar.classList.add('-translate-x-full');
+                DOM.mobileOverlay.classList.add('hidden');
+            }
+        }
+
+        // --- STREAMING_CHUNK:API Communication Service ---
+        
+        async function apiRequest(payload) {
+            if (!State.gasUrl) throw new Error("API URL not configured.");
+            updateSystemStatus('processing');
+            
+            try {
+                // Apps Script requires POSTing text/plain to bypass CORS preflight easily
+                const response = await fetch(State.gasUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+                
+                updateSystemStatus('connected');
+                return data;
+            } catch (error) {
+                console.error("API Error:", error);
+                updateSystemStatus('disconnected');
+                throw error;
+            }
+        }
+
+        function saveGasUrl() {
+            const url = DOM.gasUrlInput.value.trim();
+            if (!url.startsWith('https://script.google.com/')) {
+                showToast("Invalid URL. Must be a Google Apps Script URL.", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btn-setup-connect');
+            btn.innerHTML = '<div class="spinner w-4 h-4 mr-2 border-t-white"></div> Connecting...';
+            btn.disabled = true;
+            updateSystemStatus('processing');
+
+            // Test connection
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: 'test' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    State.gasUrl = url;
+                    localStorage.setItem('drivedrop_url', url);
+                    DOM.setupModal.classList.add('hidden');
+                    updateSystemStatus('connected');
+                    triggerConfetti();
+                    showToast("Connected successfully!", "success");
+                    loadCurrentFolder();
+                } else {
+                    throw new Error("Invalid response");
+                }
+            })
+            .catch(err => {
+                updateSystemStatus('disconnected');
+                showToast("Connection failed. Check URL and permissions.", "error");
+            })
+            .finally(() => {
+                btn.innerHTML = 'Save Key & Connect';
+                btn.disabled = false;
+            });
+        }
+
+        function showSettingsModal() {
+            DOM.gasUrlInput.value = State.gasUrl;
+            DOM.btnSetupCancel.textContent = 'Cancel';
+            DOM.setupModal.classList.remove('hidden');
+            if(State.isSidebarOpen) toggleSidebar();
+        }
+
+        function closeSetupModal() {
+            DOM.setupModal.classList.add('hidden');
+            
+            // Demo Mode: Populate with mock data if skipped
+            if (!State.gasUrl && State.folders.length === 0 && State.files.length === 0) {
+                State.folders = [
+                    { id: 'mock-f1', name: 'Work Documents' },
+                    { id: 'mock-f2', name: 'Vacation Photos' },
+                    { id: 'mock-f3', name: 'Design Assets' }
+                ];
+                State.files = [
+                    { id: 'mock-file1', name: 'Project_Proposal_v2.pdf', mimeType: 'application/pdf', size: 2450000, url: '#' },
+                    { id: 'mock-file2', name: 'IMG_8392.jpg', mimeType: 'image/jpeg', size: 4200000, url: '#' },
+                    { id: 'mock-file3', name: 'Q3_Financials.xlsx', mimeType: 'application/vnd.ms-excel', size: 850000, url: '#' },
+                    { id: 'mock-file4', name: 'Marketing_Video_Draft.mp4', mimeType: 'video/mp4', size: 15600000, url: '#' }
+                ];
+                renderItems();
+                renderBreadcrumbs();
+                renderSidebarTree();
+                setTimeout(() => showToast("Demo Mode Active: UI preview only. Connect your API to manage real files.", "info"), 500);
+            }
+        }
+
+        // --- STREAMING_CHUNK:Data Fetching and Rendering ---
+
+        function setViewMode(mode) {
+            State.viewMode = mode;
+            const gridBtn = document.getElementById('btn-view-grid');
+            const listBtn = document.getElementById('btn-view-list');
+            
+            if (mode === 'grid') {
+                gridBtn.className = "p-1.5 rounded bg-white text-primary-600 shadow-sm transition-all";
+                listBtn.className = "p-1.5 rounded text-slate-400 hover:text-slate-600 transition-all";
+            } else {
+                listBtn.className = "p-1.5 rounded bg-white text-primary-600 shadow-sm transition-all";
+                gridBtn.className = "p-1.5 rounded text-slate-400 hover:text-slate-600 transition-all";
+            }
+            renderItems(DOM.searchInput.value.toLowerCase());
+        }
+
+        async function loadCurrentFolder() {
+            if (!State.gasUrl) return; // Do not fetch if no API connected
+            
+            showLoader("Loading files...");
+            try {
+                const data = await apiRequest({ 
+                    action: 'list', 
+                    folderId: State.currentFolder 
+                });
+                State.folders = data.folders || [];
+                State.files = data.files || [];
+                renderItems();
+                renderBreadcrumbs();
+                renderSidebarTree();
+            } catch (err) {
+                showToast(err.message, "error");
+            } finally {
+                hideLoader();
+            }
+        }
+
+        function renderItems(filterQuery = "") {
+            DOM.foldersGrid.innerHTML = '';
+            DOM.filesGrid.innerHTML = '';
+
+            let displayFolders = [...State.folders];
+            let displayFiles = [...State.files];
+
+            if (filterQuery) {
+                displayFolders = displayFolders.filter(f => f.name.toLowerCase().includes(filterQuery));
+                displayFiles = displayFiles.filter(f => f.name.toLowerCase().includes(filterQuery));
+            } else {
+                // Apply custom sorting from localStorage
+                const savedFolderOrder = JSON.parse(localStorage.getItem(`sort_folders_${State.currentFolder}`)) || [];
+                const savedFileOrder = JSON.parse(localStorage.getItem(`sort_files_${State.currentFolder}`)) || [];
+                
+                displayFolders.sort((a, b) => {
+                    const idxA = savedFolderOrder.indexOf(a.id);
+                    const idxB = savedFolderOrder.indexOf(b.id);
+                    if (idxA === -1 && idxB === -1) return a.name.localeCompare(b.name);
+                    if (idxA === -1) return 1;
+                    if (idxB === -1) return -1;
+                    return idxA - idxB;
+                });
+                
+                displayFiles.sort((a, b) => {
+                    const idxA = savedFileOrder.indexOf(a.id);
+                    const idxB = savedFileOrder.indexOf(b.id);
+                    if (idxA === -1 && idxB === -1) return a.name.localeCompare(b.name);
+                    if (idxA === -1) return 1;
+                    if (idxB === -1) return -1;
+                    return idxA - idxB;
+                });
+            }
+
+            // Empty State
+            if (displayFolders.length === 0 && displayFiles.length === 0) {
+                DOM.emptyState.classList.remove('hidden');
+                DOM.emptyState.classList.add('flex');
+                DOM.foldersTitle.classList.add('hidden');
+                DOM.filesTitle.classList.add('hidden');
+                destroySortables();
+                return;
+            } else {
+                DOM.emptyState.classList.add('hidden');
+                DOM.emptyState.classList.remove('flex');
+            }
+
+            // Set wrapper classes based on view mode
+            if (State.viewMode === 'grid') {
+                DOM.foldersGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4";
+                DOM.filesGrid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4";
+            } else {
+                DOM.foldersGrid.className = "flex flex-col gap-2";
+                DOM.filesGrid.className = "flex flex-col gap-2";
+            }
+
+            // Render Folders
+            if (displayFolders.length > 0) {
+                DOM.foldersTitle.classList.remove('hidden');
+                displayFolders.forEach(folder => {
+                    const el = document.createElement('div');
+                    el.dataset.id = folder.id;
+                    el.draggable = true;
+                    el.ondragstart = (e) => handleItemDragStart(e, folder.id, 'folder');
+                    el.ondragend = handleItemDragEnd;
+                    // Folders can receive drops
+                    el.ondragover = handleFolderDragOver;
+                    el.ondragleave = handleFolderDragLeave;
+                    el.ondrop = (e) => handleFolderDrop(e, folder.id);
+                    
+                    if (State.viewMode === 'grid') {
+                        el.className = "bg-white p-4 rounded-xl border border-slate-200 hover:border-primary-400 hover:shadow-md transition-all cursor-pointer group flex items-center justify-between";
+                        el.onclick = () => navigateToFolder(folder.id, folder.name);
+                        el.innerHTML = `
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <i class="ph-fill ph-folder text-3xl text-slate-400 group-hover:text-primary-500 transition-colors"></i>
+                                <span class="font-medium text-slate-700 truncate text-sm">${escapeHtml(folder.name)}</span>
+                            </div>
+                            <div class="flex opacity-0 group-hover:opacity-100 transition-all bg-white shadow-sm rounded-lg ml-2">
+                                <button onclick="showRenameModal(event, '${folder.id}', '${escapeHtml(folder.name)}', 'folder')" class="p-2 text-slate-400 hover:text-primary-500 rounded-l-lg hover:bg-slate-50 transition-colors border-r border-slate-100" title="Rename"><i class="ph ph-pencil-simple text-base"></i></button>
+                                <button onclick="confirmDelete(event, '${folder.id}', 'folder')" class="p-2 text-slate-400 hover:text-red-500 rounded-r-lg hover:bg-red-50 transition-colors" title="Delete"><i class="ph ph-trash text-base"></i></button>
+                            </div>
+                        `;
+                    } else {
+                        // List View
+                        el.className = "bg-white p-3 rounded-xl border border-slate-200 hover:border-primary-400 hover:shadow-sm transition-all cursor-pointer group flex items-center justify-between";
+                        el.onclick = () => navigateToFolder(folder.id, folder.name);
+                        el.innerHTML = `
+                            <div class="flex items-center gap-3 overflow-hidden flex-1">
+                                <i class="ph-fill ph-folder text-2xl text-slate-400 group-hover:text-primary-500 transition-colors"></i>
+                                <span class="font-medium text-slate-700 truncate text-sm flex-1">${escapeHtml(folder.name)}</span>
+                                <span class="text-xs text-slate-400 mr-4 hidden sm:block">Folder</span>
+                            </div>
+                            <div class="flex opacity-0 group-hover:opacity-100 transition-all bg-slate-50 rounded-lg">
+                                <button onclick="showRenameModal(event, '${folder.id}', '${escapeHtml(folder.name)}', 'folder')" class="p-2 text-slate-500 hover:text-primary-600 rounded-l-lg hover:bg-primary-50 transition-colors"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="confirmDelete(event, '${folder.id}', 'folder')" class="p-2 text-slate-500 hover:text-red-600 rounded-r-lg hover:bg-red-50 transition-colors"><i class="ph ph-trash text-lg"></i></button>
+                            </div>
+                        `;
+                    }
+                    DOM.foldersGrid.appendChild(el);
+                });
+            } else {
+                DOM.foldersTitle.classList.add('hidden');
+            }
+
+            // Render Files
+            if (displayFiles.length > 0) {
+                DOM.filesTitle.classList.remove('hidden');
+                displayFiles.forEach(file => {
+                    const el = document.createElement('div');
+                    el.dataset.id = file.id;
+                    el.draggable = true;
+                    el.ondragstart = (e) => handleItemDragStart(e, file.id, 'file');
+                    el.ondragend = handleItemDragEnd;
+                    
+                    const fileIcon = getFileIcon(file.mimeType);
+                    const sizeStr = formatBytes(file.size);
+                    
+                    if (State.viewMode === 'grid') {
+                        el.className = "bg-white p-3 rounded-xl border border-slate-200 hover:border-primary-400 hover:shadow-md transition-all cursor-pointer group flex flex-col";
+                        el.onclick = () => window.open(file.url, '_blank');
+                        el.innerHTML = `
+                            <div class="h-24 bg-slate-50 rounded-lg mb-3 flex items-center justify-center relative overflow-hidden group-hover:bg-slate-100 transition-colors">
+                                <i class="${fileIcon.icon} text-4xl ${fileIcon.color}"></i>
+                                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 shadow-sm bg-white rounded-md border border-slate-100 p-0.5">
+                                    <button onclick="showRenameModal(event, '${file.id}', '${escapeHtml(file.name)}', 'file')" class="p-1.5 text-slate-400 hover:text-primary-500 hover:bg-slate-50 rounded" title="Rename"><i class="ph ph-pencil-simple text-sm"></i></button>
+                                    <button onclick="confirmDelete(event, '${file.id}', 'file')" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded" title="Delete"><i class="ph ph-trash text-sm"></i></button>
+                                </div>
+                            </div>
+                            <div class="px-1">
+                                <p class="font-medium text-slate-700 truncate text-sm mb-1" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</p>
+                                <p class="text-xs text-slate-400 flex justify-between items-center">
+                                    <span>${sizeStr}</span>
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        // List View
+                        el.className = "bg-white p-3 rounded-xl border border-slate-200 hover:border-primary-400 hover:shadow-sm transition-all cursor-pointer group flex items-center justify-between";
+                        el.onclick = () => window.open(file.url, '_blank');
+                        el.innerHTML = `
+                            <div class="flex items-center gap-3 overflow-hidden flex-1">
+                                <i class="${fileIcon.icon} text-2xl ${fileIcon.color}"></i>
+                                <span class="font-medium text-slate-700 truncate text-sm flex-1">${escapeHtml(file.name)}</span>
+                                <span class="text-xs text-slate-400 w-20 text-right hidden sm:block">${sizeStr}</span>
+                            </div>
+                            <div class="flex opacity-0 group-hover:opacity-100 transition-all bg-slate-50 rounded-lg ml-4">
+                                <button onclick="showRenameModal(event, '${file.id}', '${escapeHtml(file.name)}', 'file')" class="p-2 text-slate-500 hover:text-primary-600 rounded-l-lg hover:bg-primary-50 transition-colors"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                <button onclick="confirmDelete(event, '${file.id}', 'file')" class="p-2 text-slate-500 hover:text-red-600 rounded-r-lg hover:bg-red-50 transition-colors"><i class="ph ph-trash text-lg"></i></button>
+                            </div>
+                        `;
+                    }
+                    DOM.filesGrid.appendChild(el);
+                });
+            } else {
+                DOM.filesTitle.classList.add('hidden');
+            }
+
+            initSortable();
+        }
+
+        function destroySortables() {
+            State.sortableInstances.forEach(instance => instance.destroy());
+            State.sortableInstances = [];
+        }
+
+        function initSortable() {
+            destroySortables();
+            
+            if (typeof Sortable !== 'undefined') {
+                const saveOrder = () => {
+                    const folderIds = Array.from(DOM.foldersGrid.children).map(el => el.dataset.id).filter(id => id);
+                    const fileIds = Array.from(DOM.filesGrid.children).map(el => el.dataset.id).filter(id => id);
+                    localStorage.setItem(`sort_folders_${State.currentFolder}`, JSON.stringify(folderIds));
+                    localStorage.setItem(`sort_files_${State.currentFolder}`, JSON.stringify(fileIds));
+                };
+
+                if (DOM.foldersGrid.children.length > 0) {
+                    State.sortableInstances.push(new Sortable(DOM.foldersGrid, {
+                        animation: 150,
+                        ghostClass: 'opacity-40',
+                        delay: 100, // Allows click events to fire reliably
+                        delayOnTouchOnly: true,
+                        onEnd: saveOrder
+                    }));
+                }
+                
+                if (DOM.filesGrid.children.length > 0) {
+                    State.sortableInstances.push(new Sortable(DOM.filesGrid, {
+                        animation: 150,
+                        ghostClass: 'opacity-40',
+                        delay: 100,
+                        delayOnTouchOnly: true,
+                        onEnd: saveOrder
+                    }));
+                }
+            }
+        }
+
+        // --- STREAMING_CHUNK:Navigation and UI Helpers ---
+
+        function renderBreadcrumbs() {
+            DOM.breadcrumbs.innerHTML = '';
+            State.path.forEach((item, index) => {
+                const isLast = index === State.path.length - 1;
+                
+                const btn = document.createElement('button');
+                btn.className = `hover:text-primary-600 transition-colors ${isLast ? 'font-semibold text-slate-800' : 'px-1 rounded hover:bg-slate-100'}`;
+                btn.textContent = item.name;
+                btn.onclick = () => {
+                    if(!isLast) navigateUpTo(index);
+                };
+                
+                // Allow dropping files into parent breadcrumbs!
+                if (!isLast) {
+                    btn.ondragover = handleFolderDragOver;
+                    btn.ondragleave = handleFolderDragLeave;
+                    btn.ondrop = (e) => handleFolderDrop(e, item.id);
+                }
+
+                DOM.breadcrumbs.appendChild(btn);
+
+                if (!isLast) {
+                    const sep = document.createElement('i');
+                    sep.className = 'ph ph-caret-right text-slate-300 text-xs mx-1';
+                    DOM.breadcrumbs.appendChild(sep);
+                }
+            });
+        }
+
+        function renderSidebarTree() {
+            // Simplified tree showing just current folder context for MVP
+            DOM.folderTree.innerHTML = '';
+            
+            const rootLi = document.createElement('li');
+            rootLi.className = `flex items-center gap-2 p-2 rounded-lg cursor-pointer ${State.currentFolder === 'root' ? 'bg-primary-50 text-primary-700 font-medium' : 'text-slate-600 hover:bg-slate-100 transition-colors'}`;
+            rootLi.innerHTML = `<i class="ph-fill ph-folder"></i> My Drive`;
+            rootLi.onclick = () => { if(State.currentFolder !== 'root') navigateUpTo(0); };
+            
+            // Allow dropping into root via sidebar
+            rootLi.ondragover = handleFolderDragOver;
+            rootLi.ondragleave = handleFolderDragLeave;
+            rootLi.ondrop = (e) => handleFolderDrop(e, 'root');
+            
+            DOM.folderTree.appendChild(rootLi);
+
+            if (State.currentFolder !== 'root') {
+                const subLi = document.createElement('li');
+                subLi.className = `flex items-center gap-2 p-2 pl-6 rounded-lg bg-primary-50 text-primary-700 font-medium transition-colors`;
+                subLi.innerHTML = `<i class="ph-fill ph-folder-open"></i> ${escapeHtml(State.path[State.path.length-1].name)}`;
+                
+                // Current folder context doesn't need to be drop target for items already in it, 
+                // but adding it prevents errors if dropped
+                subLi.ondragover = handleFolderDragOver;
+                subLi.ondragleave = handleFolderDragLeave;
+                subLi.ondrop = (e) => handleFolderDrop(e, State.currentFolder);
+
+                DOM.folderTree.appendChild(subLi);
+            }
+        }
+
+        function navigateToFolder(id, name) {
+            if (!State.gasUrl) { showToast("Connect API via Settings to navigate inside folders.", "info"); return; }
+            State.currentFolder = id;
+            State.path.push({ id, name });
+            DOM.searchInput.value = '';
+            loadCurrentFolder();
+        }
+
+        function navigateUpTo(index) {
+            if (!State.gasUrl) { showToast("Connect API via Settings to navigate inside folders.", "info"); return; }
+            State.path = State.path.slice(0, index + 1);
+            State.currentFolder = State.path[State.path.length - 1].id;
+            DOM.searchInput.value = '';
+            loadCurrentFolder();
+        }
+
+        // --- STREAMING_CHUNK:File Uploads ---
+
+        function handleDrop(e) {
+            DOM.dragOverlay.classList.add('hidden');
+            DOM.dragOverlay.classList.remove('flex');
+            
+            // Only handle OS file drops here
+            if (e.dataTransfer.types && (e.dataTransfer.types.includes("Files") || e.dataTransfer.types.includes("application/x-moz-file"))) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+            e.target.value = ''; // reset
+        }
+
+        function handleFiles(files) {
+            if (!files || files.length === 0) return;
+            Array.from(files).forEach(uploadSingleFile);
+        }
+
+        function uploadSingleFile(file) {
+            // 25MB limit guard for GAS robustness
+            const MAX_SIZE = 25 * 1024 * 1024; 
+            if (file.size > MAX_SIZE) {
+                showToast(`${file.name} is too large (Max 25MB).`, "error");
+                return;
+            }
+
+            const toastId = showUploadProgress(file.name);
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const dataUrl = e.target.result;
+                const base64Data = dataUrl.split(',')[1];
+
+                try {
+                    await apiRequest({
+                        action: 'upload',
+                        parentId: State.currentFolder,
+                        filename: file.name,
+                        mimeType: file.type || 'application/octet-stream',
+                        data: base64Data
+                    });
+                    
+                    updateToastSuccess(toastId, file.name);
+                    loadCurrentFolder(); // Refresh to show new file
+                } catch (error) {
+                    updateToastError(toastId, file.name, error.message);
+                }
+            };
+            reader.onerror = () => updateToastError(toastId, file.name, "File read error");
+            reader.readAsDataURL(file);
+        }
+
+        // --- STREAMING_CHUNK:Folder Creation & Deletion Logic ---
+
+        // Internal Drag and Drop logic for Moving Items
+        function handleItemDragStart(e, id, type) {
+            e.dataTransfer.setData('application/json', JSON.stringify({ id, type }));
+            e.dataTransfer.effectAllowed = 'move';
+            e.target.classList.add('opacity-40', 'scale-95'); // visual feedback
+        }
+
+        function handleItemDragEnd(e) {
+            e.target.classList.remove('opacity-40', 'scale-95');
+        }
+
+        function handleFolderDragOver(e) {
+            e.preventDefault(); // Necessary to allow dropping
+            // Only highlight if dragging an internal item, not OS files
+            if (e.dataTransfer.types.includes('application/json')) {
+                e.dataTransfer.dropEffect = 'move';
+                e.currentTarget.classList.add('ring-2', 'ring-primary-500', 'bg-primary-50');
+            }
+        }
+
+        function handleFolderDragLeave(e) {
+            e.currentTarget.classList.remove('ring-2', 'ring-primary-500', 'bg-primary-50');
+        }
+
+        async function handleFolderDrop(e, targetFolderId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('ring-2', 'ring-primary-500', 'bg-primary-50');
+            
+            try {
+                const dataRaw = e.dataTransfer.getData('application/json');
+                if (!dataRaw) return; // Could be an OS file drop
+                
+                const data = JSON.parse(dataRaw);
+                // Prevent dropping folder into itself
+                if (data.id === targetFolderId) return; 
+                
+                showLoader(`Moving ${data.type}...`);
+                await apiRequest({
+                    action: 'move',
+                    id: data.id,
+                    type: data.type,
+                    targetFolderId: targetFolderId
+                });
+                
+                showToast("Item moved successfully", "success");
+                loadCurrentFolder();
+            } catch (err) {
+                if (err instanceof SyntaxError) {
+                    // Ignore non-json data (like OS file text)
+                } else {
+                    showToast("Failed to move item", "error");
+                }
+            } finally {
+                hideLoader();
+            }
+        }
+
+        // Rename logic
+        let pendingRename = null;
+        function showRenameModal(e, id, currentName, type) {
+            e.stopPropagation(); // prevent opening the item
+            pendingRename = { id, type };
+            document.getElementById('rename-title').textContent = `Rename ${type === 'folder' ? 'Folder' : 'File'}`;
+            document.getElementById('rename-input').value = currentName;
+            document.getElementById('rename-modal').classList.remove('hidden');
+            document.getElementById('rename-input').focus();
+            document.getElementById('rename-input').select();
+        }
+
+        async function executeRename() {
+            if (!pendingRename) return;
+            const newName = document.getElementById('rename-input').value.trim();
+            if (!newName) return;
+
+            const { id, type } = pendingRename;
+            closeModal('rename-modal');
+            showLoader("Renaming...");
+
+            try {
+                await apiRequest({
+                    action: 'rename',
+                    id: id,
+                    newName: newName,
+                    type: type
+                });
+                showToast("Renamed successfully", "success");
+                loadCurrentFolder();
+            } catch (err) {
+                showToast("Failed to rename", "error");
+            } finally {
+                hideLoader();
+                pendingRename = null;
+            }
+        }
+
+        function showCreateFolderModal() {
+            document.getElementById('new-folder-name').value = '';
+            document.getElementById('create-folder-modal').classList.remove('hidden');
+            document.getElementById('new-folder-name').focus();
+            if(State.isSidebarOpen) toggleSidebar();
+        }
+
+        async function executeCreateFolder() {
+            const name = document.getElementById('new-folder-name').value.trim();
+            if (!name) return;
+
+            closeModal('create-folder-modal');
+            showLoader("Creating folder...");
+
+            try {
+                await apiRequest({
+                    action: 'createFolder',
+                    parentId: State.currentFolder,
+                    folderName: name
+                });
+                showToast("Folder created", "success");
+                loadCurrentFolder();
+            } catch (err) {
+                showToast("Failed to create folder", "error");
+            } finally {
+                hideLoader();
+            }
+        }
+
+        let pendingDelete = null;
+        function confirmDelete(e, id, type) {
+            e.stopPropagation(); // prevent opening the item
+            pendingDelete = { id, type };
+            document.getElementById('confirm-title').textContent = `Delete ${type}?`;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('confirm-action-btn').addEventListener('click', async () => {
+            if (!pendingDelete) return;
+            const { id, type } = pendingDelete;
+            closeModal('confirm-modal');
+            showLoader("Deleting...");
+
+            try {
+                await apiRequest({
+                    action: 'delete',
+                    id: id,
+                    type: type // sending type just in case backend needs optimization
+                });
+                showToast(`${type === 'folder' ? 'Folder' : 'File'} deleted`, "success");
+                loadCurrentFolder();
+            } catch (err) {
+                showToast(`Failed to delete`, "error");
+            } finally {
+                hideLoader();
+                pendingDelete = null;
+            }
+        });
+
+
+        // --- STREAMING_CHUNK:Utilities and UI Components ---
+
+        function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function showLoader(text) {
+            DOM.loaderText.textContent = text;
+            DOM.loader.classList.remove('hidden');
+        }
+        function hideLoader() {
+            DOM.loader.classList.add('hidden');
+        }
+
+        function showToast(message, type = "info") {
+            const id = 'toast-' + Date.now();
+            createToastElement(id, message, type);
+            setTimeout(() => removeToast(id), 4000);
+            return id;
+        }
+
+        function showUploadProgress(filename) {
+            const id = 'toast-' + Date.now();
+            createToastElement(id, `Uploading: <span class="font-semibold truncate max-w-[150px] inline-block align-bottom">${escapeHtml(filename)}</span>...`, 'loading');
+            return id;
+        }
+
+        function updateToastSuccess(id, filename) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.className = "bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-3 pointer-events-auto toast-enter";
+                el.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> Uploaded ${escapeHtml(filename)}`;
+                setTimeout(() => removeToast(id), 3000);
+            }
+        }
+
+        function updateToastError(id, filename, err) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.className = "bg-red-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-3 pointer-events-auto toast-enter";
+                el.innerHTML = `<i class="ph-fill ph-x-circle text-lg"></i> Failed: ${escapeHtml(filename)}`;
+                setTimeout(() => removeToast(id), 4000);
+            }
+        }
+
+        function createToastElement(id, html, type) {
+            const el = document.createElement('div');
+            el.id = id;
+            
+            let bgClass = "bg-slate-800 text-white";
+            let icon = "";
+            
+            if (type === "success") { bgClass = "bg-green-600 text-white"; icon = `<i class="ph-fill ph-check-circle text-lg"></i>`; }
+            else if (type === "error") { bgClass = "bg-red-600 text-white"; icon = `<i class="ph-fill ph-warning-circle text-lg"></i>`; }
+            else if (type === "loading") { bgClass = "bg-primary-600 text-white"; icon = `<div class="spinner w-4 h-4 border-t-white"></div>`; }
+            
+            el.className = `${bgClass} px-4 py-3 rounded-xl shadow-lg text-sm flex items-center gap-3 pointer-events-auto toast-enter min-w-[250px] max-w-sm`;
+            el.innerHTML = `${icon} <div class="flex-1">${html}</div>`;
+            DOM.toastContainer.appendChild(el);
+        }
+
+        function removeToast(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.replace('toast-enter', 'toast-exit');
+                setTimeout(() => el.remove(), 300);
+            }
+        }
+
+        function getFileIcon(mimeType) {
+            if (mimeType.includes('image')) return { icon: 'ph-fill ph-image', color: 'text-blue-500' };
+            if (mimeType.includes('pdf')) return { icon: 'ph-fill ph-file-pdf', color: 'text-red-500' };
+            if (mimeType.includes('video')) return { icon: 'ph-fill ph-video', color: 'text-purple-500' };
+            if (mimeType.includes('audio')) return { icon: 'ph-fill ph-music-notes', color: 'text-pink-500' };
+            if (mimeType.includes('zip') || mimeType.includes('compressed')) return { icon: 'ph-fill ph-file-archive', color: 'text-orange-500' };
+            if (mimeType.includes('document') || mimeType.includes('word')) return { icon: 'ph-fill ph-file-doc', color: 'text-blue-600' };
+            if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return { icon: 'ph-fill ph-file-xls', color: 'text-green-600' };
+            if (mimeType.includes('presentation')) return { icon: 'ph-fill ph-projector-screen', color: 'text-yellow-500' };
+            return { icon: 'ph-fill ph-file', color: 'text-slate-400' };
+        }
+
+        function formatBytes(bytes, decimals = 1) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        function escapeHtml(unsafe) {
+            return (unsafe || '').toString()
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        // Start App
+        window.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
