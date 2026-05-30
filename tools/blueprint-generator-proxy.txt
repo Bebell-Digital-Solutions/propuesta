@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bebell Digital Solutions | Product Blueprint Generator</title>
+    
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Marked.js for rendering Gemini's Markdown response to HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Phosphor Icons for modern UI icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Tailwind Config and CSS -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            500: '#DF1783', // Primary custom color
+                            600: '#be126c',
+                            900: '#831843',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Prose styles for Markdown Rendering - LIGHT MODE */
+        .prose h1 { font-size: 1.875rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: #111827; }
+        .prose h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #1f2937; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+        .prose h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #334155; }
+        .prose p { margin-bottom: 1rem; line-height: 1.6; color: #475569; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+        .prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+        .prose li { margin-bottom: 0.25rem; }
+        .prose strong { color: #0f172a; font-weight: 600; }
+        .prose blockquote { border-left: 4px solid #DF1783; padding-left: 1rem; color: #64748b; font-style: italic; background-color: #fdf2f8; padding: 0.75rem 1rem; border-radius: 0 0.5rem 0.5rem 0; margin-bottom: 1rem; }
+        .prose code { background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875em; color: #DF1783; }
+        
+        .hide { display: none !important; }
+        
+        /* Loading Animation */
+        .pulse-glow { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(223, 23, 131, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(223, 23, 131, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(223, 23, 131, 0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen selection:bg-brand-500 selection:text-white font-sans">
+
+    <!-- Header Image Banner (Height: 320px) -->
+    <div class="w-full h-[320px] bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop');">
+        <!-- Overlays for brand tint and text readability -->
+        <div class="absolute inset-0 bg-brand-900/40 mix-blend-multiply"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent"></div>
+        
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-8 pt-12 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-xl bg-transparent overflow-hidden flex items-center justify-center p-1">
+                    <img src="https://cdn.shopify.com/s/files/1/0242/0175/6777/files/logo-animation-bebell-1.gif?v=1777437988" 
+                         alt="Bebell Digital Solutions Logo" 
+                         class="w-full h-full object-contain"
+                         onerror="this.onerror=null; this.src='https://placehold.co/100x100/transparent/DF1783?text=BDS';">
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white tracking-tight drop-shadow-md">Bebell Digital Solutions</h1>
+                    <p class="text-brand-50 font-medium drop-shadow-md text-sm">Product Blueprint Generator</p>
+                </div>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white shadow-lg">
+                <i class="ph ph-cpu text-brand-100"></i> AI Powered
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Form Container overlapping the banner -->
+    <!-- Negative margin pulls it up by half the banner height (160px) -->
+    <main class="relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-8 -mt-[160px] mb-16">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col">
+            
+            <div class="p-6 sm:p-10 relative" id="mainScrollArea">
+                
+                <!-- Error Banner -->
+                <div id="errorBanner" class="hide mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start gap-3">
+                    <i class="ph ph-warning-circle text-xl mt-0.5 text-red-500"></i>
+                    <div id="errorMessage" class="text-sm font-medium">An error occurred. Please try again.</div>
+                </div>
+
+                <!-- VIEW 1: FORM -->
+                <form id="blueprintForm" class="space-y-8 transition-opacity duration-300">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Required: Product Name -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700" for="productName">
+                                Product Name <span class="text-brand-500">*</span>
+                            </label>
+                            <input type="text" id="productName" required placeholder="e.g., Nexus CRM" 
+                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm">
+                        </div>
+                        
+                        <!-- Optional: Industry/Niche -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700" for="industry">
+                                Industry / Niche <span class="text-gray-400 font-normal text-xs ml-1">(Optional)</span>
+                            </label>
+                            <input type="text" id="industry" placeholder="e.g., Real Estate, Healthcare Tech" 
+                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Required: Target Audience -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700" for="targetAudience">
+                            Target Audience <span class="text-brand-500">*</span>
+                        </label>
+                        <textarea id="targetAudience" required rows="2" placeholder="Describe the ideal users (e.g., Marketing agencies with 10-50 employees struggling with content approval)." 
+                            class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm resize-none"></textarea>
+                    </div>
+
+                    <!-- Required: Main Functionality -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700" for="mainFunctionality">
+                            Main Functionality <span class="text-brand-500">*</span>
+                        </label>
+                        <textarea id="mainFunctionality" required rows="3" placeholder="What does the product do? What are its primary features and use cases?" 
+                            class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm resize-none"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Optional: Pricing Model -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700" for="pricingModel">
+                                Pricing Model <span class="text-gray-400 font-normal text-xs ml-1">(Optional)</span>
+                            </label>
+                            <input type="text" id="pricingModel" placeholder="e.g., SaaS Freemium, $29/mo" 
+                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm">
+                        </div>
+
+                        <!-- Optional: Additional Notes -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700" for="optionalNotes">
+                                Additional Notes <span class="text-gray-400 font-normal text-xs ml-1">(Optional)</span>
+                            </label>
+                            <input type="text" id="optionalNotes" placeholder="Any specific requirements or tone?" 
+                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Required: Source Code -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <label class="block text-sm font-semibold text-gray-700" for="sourceCode">
+                                Source Code / Architecture Data <span class="text-brand-500">*</span>
+                            </label>
+                            <span class="text-xs text-gray-500">Paste code, JSON, or technical specs</span>
+                        </div>
+                        <textarea id="sourceCode" required rows="6" placeholder="Paste your frontend/backend code, database schema, or technical architecture here for analysis..." 
+                            class="w-full font-mono text-sm bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm resize-y"></textarea>
+                    </div>
+
+                    <!-- Submit Action -->
+                    <div class="pt-6 flex justify-end border-t border-gray-100">
+                        <button type="submit" id="submitBtn" class="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+                            Generate Blueprint
+                            <i class="ph ph-magic-wand text-xl"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- VIEW 2: LOADING -->
+                <div id="loadingView" class="hide flex flex-col items-center justify-center py-20 min-h-[400px]">
+                    <div class="relative w-24 h-24 mb-8">
+                        <!-- Outer Ring -->
+                        <div class="absolute inset-0 rounded-full border-t-4 border-brand-500 animate-spin opacity-80"></div>
+                        <!-- Inner Ring -->
+                        <div class="absolute inset-2 rounded-full border-r-4 border-brand-200 animate-spin opacity-60" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                        <!-- Center Icon -->
+                        <div class="absolute inset-0 flex items-center justify-center text-brand-500 pulse-glow rounded-full bg-brand-50/50">
+                            <i class="ph-fill ph-brain text-4xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Analyzing Architecture</h3>
+                    <p id="loadingStatus" class="text-gray-500 text-sm animate-pulse font-medium">Parsing source code and identifying workflows...</p>
+                    
+                    <!-- Progress steps visual -->
+                    <div class="w-full max-w-sm mt-10 space-y-4">
+                        <div class="flex items-center gap-3 text-sm font-medium text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100" id="step1">
+                            <i class="ph-fill ph-check-circle text-brand-500 text-lg opacity-0 transition-opacity" id="step1Icon"></i>
+                            <span>Ingesting context parameters</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm font-medium text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100" id="step2">
+                            <i class="ph-fill ph-check-circle text-brand-500 text-lg opacity-0 transition-opacity" id="step2Icon"></i>
+                            <span>Synthesizing business value</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm font-medium text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100" id="step3">
+                            <i class="ph-fill ph-check-circle text-brand-500 text-lg opacity-0 transition-opacity" id="step3Icon"></i>
+                            <span>Drafting technical specifications</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 3: RESULT -->
+                <div id="resultView" class="hide flex flex-col h-full">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-brand-50 p-5 rounded-xl border border-brand-100">
+                        <div class="flex items-center gap-3 text-brand-600 font-bold text-lg">
+                            <i class="ph-fill ph-check-circle text-2xl"></i>
+                            Blueprint Generated Successfully
+                        </div>
+                        <div class="flex gap-3 w-full sm:w-auto">
+                            <button id="copyBtn" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold py-2.5 px-5 rounded-lg shadow-sm transition-all border border-gray-200 hover:border-gray-300">
+                                <i class="ph ph-copy text-lg"></i> Copy Markdown
+                            </button>
+                            <button id="resetBtn" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-red-50 text-red-600 text-sm font-semibold py-2.5 px-5 rounded-lg shadow-sm transition-all border border-gray-200 hover:border-red-200">
+                                <i class="ph ph-arrow-counter-clockwise text-lg"></i> Start Over
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Rendered Markdown Content goes here -->
+                    <div id="markdownOutput" class="prose max-w-none bg-white p-2 sm:p-4">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- CONFIGURATION ---
+        // TODO: Replace this URL with your actual Render URL when deployed
+        // e.g., 'https://my-bebell-proxy.onrender.com/api/ask-ai'
+        const RENDER_PROXY_URL = 'https://your-render-app.onrender.com/api/ask-ai'; 
+
+        // DOM Elements
+        const form = document.getElementById('blueprintForm');
+        const viewForm = document.getElementById('blueprintForm');
+        const viewLoading = document.getElementById('loadingView');
+        const viewResult = document.getElementById('resultView');
+        const markdownOutput = document.getElementById('markdownOutput');
+        const errorBanner = document.getElementById('errorBanner');
+        const errorMessage = document.getElementById('errorMessage');
+        const copyBtn = document.getElementById('copyBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const mainScrollArea = document.getElementById('mainScrollArea');
+
+        // Master Prompt Template String
+        const MASTER_PROMPT_TEMPLATE = `BEBELL DIGITAL SOLUTIONS PRODUCT BLUEPRINT GENERATOR
+You are a Senior Product Manager, Technical Writer, UX Analyst, Software Architect, SaaS Consultant, and Marketing Strategist.
+Your task is to analyze the information provided and generate a complete Digital Product Blueprint for the software product.
+The objective is to create professional documentation suitable for:
+Product catalogs, SaaS directories, Sales presentations, Investor presentations, Internal documentation, Product launch pages, Marketing materials, Technical overviews.
+
+INPUTS
+Product Name: {{PRODUCT_NAME}}
+Main Functionality: {{MAIN_FUNCTIONALITY}}
+Target Audience: {{TARGET_AUDIENCE}}
+Industry/Niche: {{INDUSTRY}}
+Pricing Model: {{PRICING}}
+Additional Notes: {{OPTIONAL_NOTES}}
+
+Source Code/Architecture:
+\`\`\`
+{{SOURCE_CODE}}
+\`\`\`
+
+ANALYSIS REQUIREMENTS
+Before generating the documentation:
+- Analyze the source code structure.
+- Identify all major features, workflows, entities, data relationships, views, integrations, storage, automation, and responsive design features.
+- Infer business use cases from the functionality and architecture.
+- If information is not explicitly available, make reasonable professional assumptions based on the code and functionality.
+- Do not mention assumptions unless necessary.
+- Write as if the product already exists and is ready for market. Use clear, professional language.
+- Avoid hype, exaggerated marketing claims, or generic buzzwords. Focus on practical business value.
+
+OUTPUT FORMAT
+Generate the following sections using clear Markdown formatting:
+1. PRODUCT IDENTITY (Name, Tagline, Category, Subcategory, Type, Version, Short Description)
+2. EXECUTIVE SUMMARY
+3. CORE VALUE PROPOSITION
+4. TARGET AUDIENCE
+5. PRIMARY USE CASES (Scenario, User Type, Business Benefit)
+6. KEY FEATURES & CAPABILITIES
+7. USER INTERFACE OVERVIEW
+8. WORKSPACE VIEWS
+9. DATA ARCHITECTURE
+10. USER WORKFLOW
+11. AUTOMATION FEATURES
+12. CUSTOMIZATION OPTIONS
+13. INTEGRATIONS & CONNECTIVITY
+14. TECHNICAL SPECIFICATIONS
+15. DESIGN SYSTEM
+16. COMPETITIVE ADVANTAGES
+17. BUSINESS BENEFITS
+18. FUTURE EXPANSION OPPORTUNITIES
+19. PRODUCT POSITIONING STATEMENT
+20. PRODUCT SNAPSHOT (Summary table)
+
+IMPORTANT: 
+The output must read like documentation produced by an experienced software product team. 
+The document should be detailed, structured, and comprehensive. 
+Generate between 1,500 and 3,000 words whenever sufficient information exists. 
+Do not output analysis notes. Output ONLY the final Digital Product Blueprint in Markdown.`;
+
+        // Form Submit Handler
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorBanner.classList.add('hide');
+
+            // 1. Capture Form Data
+            const formData = {
+                productName: document.getElementById('productName').value.trim(),
+                industry: document.getElementById('industry').value.trim() || 'Not specified',
+                targetAudience: document.getElementById('targetAudience').value.trim(),
+                mainFunctionality: document.getElementById('mainFunctionality').value.trim(),
+                pricingModel: document.getElementById('pricingModel').value.trim() || 'Not specified',
+                optionalNotes: document.getElementById('optionalNotes').value.trim() || 'None',
+                sourceCode: document.getElementById('sourceCode').value.trim(),
+            };
+
+            // 2. Perform Dynamic Prompt Injection
+            let finalPrompt = MASTER_PROMPT_TEMPLATE
+                .replace('{{PRODUCT_NAME}}', formData.productName)
+                .replace('{{INDUSTRY}}', formData.industry)
+                .replace('{{TARGET_AUDIENCE}}', formData.targetAudience)
+                .replace('{{MAIN_FUNCTIONALITY}}', formData.mainFunctionality)
+                .replace('{{PRICING}}', formData.pricingModel)
+                .replace('{{OPTIONAL_NOTES}}', formData.optionalNotes)
+                .replace('{{SOURCE_CODE}}', formData.sourceCode);
+
+            // 3. Update UI to Loading State
+            switchView('loading');
+            simulateLoadingProgress(); // Purely visual UX enhancement
+
+            // 4. Send to Backend (Render Proxy)
+            try {
+                // We use a timeout to show the loading animation properly, 
+                // but in real life, the fetch takes time anyway.
+                const aiResponse = await fetchFromProxy(finalPrompt, formData.productName);
+                
+                // 5. Render Response
+                renderMarkdown(aiResponse);
+                switchView('result');
+
+            } catch (error) {
+                console.error("API Error:", error);
+                errorMessage.textContent = error.message || "Failed to connect to the server.";
+                errorBanner.classList.remove('hide');
+                switchView('form'); // go back to form so they don't lose data
+            }
+        });
+
+        /**
+         * Function to call your Render Proxy.
+         * Contains a Fallback "Simulation Mode" so you can see the UI working 
+         * immediately, even if your backend isn't deployed yet.
+         */
+        async function fetchFromProxy(promptText, productName) {
+            try {
+                // Attempt to fetch from your backend
+                const response = await fetch(RENDER_PROXY_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userPrompt: promptText })
+                });
+
+                if (!response.ok) throw new Error("Network response was not ok");
+                
+                const data = await response.json();
+                
+                // Assumes your backend returns JSON like: { "text": "## Markdown Result..." }
+                // Adjust this depending on exactly how your Node.js server sends data back.
+                return data.text || data.response || data.choices[0].message.content; 
+
+            } catch (err) {
+                console.warn("Could not connect to actual proxy. Using Fallback Simulation Mode for demonstration.");
+                
+                // FALLBACK SIMULATION: If API fails (because URL is dummy), wait 3s and return mock markdown.
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(`
+# 1. PRODUCT IDENTITY
+**Product Name:** ${productName}  
+**Tagline:** Streamlining operations through intelligent architecture.  
+**Category:** Enterprise Software  
+**Product Type:** Cloud-based Web Application  
+**Version:** 1.0 (MVP)  
+**Short Description:** A robust digital solution designed to automate workflows and provide deep operational visibility.
+
+---
+
+# 2. EXECUTIVE SUMMARY
+${productName} is an advanced software platform engineered to resolve critical operational bottlenecks. Designed specifically for our target market, it leverages modern cloud architecture to deliver scalable, reliable, and secure performance. By automating repetitive tasks and centralizing data, organizations can drastically reduce overhead and accelerate their time-to-value.
+
+---
+
+# 3. CORE VALUE PROPOSITION
+*   **Pain Point:** Fragmented data and highly manual administrative tasks.
+*   **Solution:** A unified, single-source-of-truth dashboard with automated workflows.
+*   **Business Impact:** Reduces operational costs by an estimated 30% and improves cross-team collaboration.
+
+*(Note: This is a simulated response. Once you connect your valid Render Proxy URL in the code, the real Gemini AI response will populate here based on your source code analysis!)*
+
+# 14. TECHNICAL SPECIFICATIONS
+*   **Frontend Technology:** HTML5, Tailwind CSS, Vanilla JS
+*   **Backend Technology:** Node.js (Proxy via Render)
+*   **API Support:** RESTful API Architecture
+*   **Browser Compatibility:** Chrome, Safari, Firefox, Edge
+                        `);
+                    }, 3500); // 3.5 second simulated delay
+                });
+            }
+        }
+
+        // Helper to switch views safely
+        function switchView(view) {
+            viewForm.classList.add('hide');
+            viewLoading.classList.add('hide');
+            viewResult.classList.add('hide');
+
+            if (view === 'form') viewForm.classList.remove('hide');
+            if (view === 'loading') viewLoading.classList.remove('hide');
+            if (view === 'result') {
+                viewResult.classList.remove('hide');
+                mainScrollArea.scrollTop = 0; // scroll to top of results
+            }
+        }
+
+        // Helper to render markdown safely
+        let rawMarkdownContent = ""; // store for clipboard
+        function renderMarkdown(markdownString) {
+            rawMarkdownContent = markdownString;
+            // Using marked.js loaded in the head
+            markdownOutput.innerHTML = marked.parse(markdownString);
+        }
+
+        // Visual loading steps simulator
+        function simulateLoadingProgress() {
+            const icons = [
+                document.getElementById('step1Icon'),
+                document.getElementById('step2Icon'),
+                document.getElementById('step3Icon')
+            ];
+            const statusTexts = [
+                "Parsing source code and identifying workflows...",
+                "Mapping database entities and APIs...",
+                "Synthesizing business value and use cases...",
+                "Drafting final markdown documentation..."
+            ];
+            const statusEl = document.getElementById('loadingStatus');
+            
+            // Reset icons
+            icons.forEach(i => { i.classList.remove('opacity-100'); i.classList.add('opacity-0'); });
+            
+            setTimeout(() => { icons[0].classList.replace('opacity-0', 'opacity-100'); statusEl.innerText = statusTexts[1]; }, 1000);
+            setTimeout(() => { icons[1].classList.replace('opacity-0', 'opacity-100'); statusEl.innerText = statusTexts[2]; }, 2000);
+            setTimeout(() => { icons[2].classList.replace('opacity-0', 'opacity-100'); statusEl.innerText = statusTexts[3]; }, 3000);
+        }
+
+        // Copy to Clipboard
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(rawMarkdownContent).then(() => {
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="ph-fill ph-check"></i> Copied!';
+                copyBtn.classList.add('text-green-400', 'border-green-500/50');
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.classList.remove('text-green-400', 'border-green-500/50');
+                }, 2000);
+            }).catch(err => {
+                // Fallback for older browsers or iframe restrictions
+                const textArea = document.createElement("textarea");
+                textArea.value = rawMarkdownContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert("Copied to clipboard!");
+                } catch (ex) {
+                    console.error("Fallback copy failed", ex);
+                }
+                document.body.removeChild(textArea);
+            });
+        });
+
+        // Reset Button
+        resetBtn.addEventListener('click', () => {
+            // Optional: You can clear the form, or leave it populated so they can tweak it.
+            // form.reset(); 
+            switchView('form');
+        });
+    </script>
+</body>
+</html>
