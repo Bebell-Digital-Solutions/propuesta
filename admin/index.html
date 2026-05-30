@@ -177,7 +177,38 @@
                 <i data-lucide="filter" class="w-5 h-5 mr-3"></i> <span class="data-i18n" data-en="Sales Funnel" data-es="Embudo de Ventas">Sales Funnel</span>
             </button>
 
+<!-- Parent Menu -->
+<div>
+    <button onclick="toggleSubmenu('marketing-submenu')" 
+        class="w-full flex items-center justify-between px-6 py-3 hover:bg-white/5 text-white/90 border-l-4 border-transparent transition-colors">
+        
+        <div class="flex items-center">
+            <i data-lucide="folder" class="w-5 h-5 mr-3"></i>
+            <span>Marketing Tools</span>
+        </div>
 
+        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+    </button>
+
+    <!-- Submenu -->
+    <div id="toolbox-submenu" class="hidden pl-8">
+
+
+
+        <button onclick="openResource('WhatsApp Links', 'https://whatsapp.elnegocio.digital/')"
+            class="w-full flex items-center px-6 py-2 hover:bg-white/5 text-white/70">
+            <i data-lucide="link" class="w-4 h-4 mr-3"></i>
+            WhatsApp Links
+        </button>
+
+        <button onclick="openResource('Digital Business', 'https://elnegocio.digital')"
+            class="w-full flex items-center px-6 py-2 hover:bg-white/5 text-white/70">
+            <i data-lucide="globe" class="w-4 h-4 mr-3"></i>
+            Digital Business
+        </button>
+
+    </div>
+</div>
 
 
             <button onclick="openResource('Brand Auditor', '/brand-auditor')" class="w-full flex items-center px-6 py-3 hover:bg-white/5 text-white/90 border-l-4 border-transparent transition-colors">
@@ -1922,8 +1953,12 @@
         }
     </script>
 
-
-
+            // Add submenu to sidebar!
+<script>
+function toggleSubmenu(id) {
+    document.getElementById(id).classList.toggle('hidden');
+}
+</script>
 
     
 </body>
