@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Propuesta de Transformación Digital | Cedaky Mall</title>
+
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind configuration with Cedaky Mall 4-color brand palette
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              DEFAULT: '#021851',
+              light: '#0a2773',
+              dark: '#011038',
+            },
+            royal: {
+              DEFAULT: '#016fe9',
+              dark: '#0158bd',
+              soft: '#e8f3ff',
+            },
+            gold: {
+              DEFAULT: '#fbd802',
+              dark: '#e0be00',
+              soft: '#fffbe6',
+            },
+            limebrand: {
+              DEFAULT: '#80cc1b',
+              dark: '#69aa13',
+              soft: '#f2fae6',
+            },
+            canvas: '#f4f7fb',
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* Smooth section transition animation */
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-view {
+      display: none;
+    }
+
+    .section-view.active {
+      display: block;
+      animation: fadeSlideIn 0.28s ease-out forwards;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    }
+
+    /* Subtle custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Print styles for printable PDF quote modal */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-quote-area,
+      #printable-quote-area * {
+        visibility: visible;
+      }
+      #printable-quote-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 16px !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #ffffff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased selection:bg-[#016fe9]/20 selection:text-[#021851]">
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="sidebar-backdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-[#021851]/70 backdrop-blur-xs z-40 hidden lg:hidden transition-opacity"></div>
+
+  <!-- Main Dashboard Shell -->
+  <div class="min-h-screen flex">
+
+    <!-- ==================== LEFT FIXED SIDEBAR (#021851) ==================== -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-[#021851] text-slate-100 flex flex-col border-r border-white/10 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl">
+
+      <!-- Mobile Close Button -->
+      <button onclick="toggleMobileSidebar(false)" class="lg:hidden absolute top-3 right-3 z-10 p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors" aria-label="Cerrar menú">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- =================================================================
+           PROSPECT LOGO CONTAINER (TOP LEFT OF SIDEBAR)
+      ================================================================== -->
+      <div class="px-5 py-5 border-b border-white/10 flex flex-col items-center gap-3">
+        <!-- Logo centered on top, 150x150 -->
+        <div class="relative w-[150px] h-[150px] rounded-xl bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+          <img
+            id="prospect-logo"
+            src="https://ik.imagekit.io/bebell/LeadLens/prospects/prospects/logo%20Cedaky.webp"
+            alt="Cedaky Mall Logo"
+            class="w-full h-full object-contain p-2 hidden"
+            onload="this.classList.remove('hidden'); document.getElementById('logo-fallback').classList.add('hidden');"
+            onerror="this.classList.add('hidden'); document.getElementById('logo-fallback').classList.remove('hidden');"
+          />
+          <!-- Automatic Brand SVG Fallback Badge (#016fe9, #fbd802, #80cc1b) -->
+          <div id="logo-fallback" class="w-full h-full flex items-center justify-center bg-[#016fe9]/20">
+            <svg class="w-24 h-24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Cedaky Mall Badge">
+              <rect x="2" y="2" width="36" height="36" rx="9" fill="#021851" stroke="#016fe9" stroke-width="2" />
+              <path d="M9 28H31" stroke="#80cc1b" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M12 28V16L20 11L28 16V28" stroke="#016fe9" stroke-width="2.4" stroke-linejoin="round" />
+              <rect x="17.5" y="20" width="5" height="8" rx="1" fill="#fbd802" />
+              <circle cx="20" cy="15.5" r="1.8" fill="#80cc1b" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Text centered below the logo -->
+        <div class="min-w-0 text-center">
+          <p class="text-base font-extrabold tracking-tight text-white leading-tight truncate">
+            CEDAKY <span class="text-[#fbd802]">MALL</span>
+          </p>
+          <p class="text-[11px] text-slate-300 flex items-center justify-center gap-1 mt-0.5 truncate">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#80cc1b] shrink-0"></span>
+            <span>Puerto Plata, Rep. Dom.</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation Section Title -->
+      <div class="px-6 pt-5 pb-2">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Navegación</p>
+      </div>
+
+      <!-- 6-Section Interactive Navigation -->
+      <nav class="flex-1 px-3 space-y-1.5 overflow-y-auto" aria-label="Secciones de la propuesta">
+        <button onclick="navigateTo('resumen')" data-nav="resumen" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-left border-l-4 border-transparent cursor-pointer">
+          <i data-lucide="layout-dashboard" class="w-4.5 h-4.5 shrink-0"></i>
+          <span class="truncate">Resumen Ejecutivo</span>
+        </button>
+
+        <button onclick="navigateTo('auditoria')" data-nav="auditoria" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-left border-l-4 border-transparent cursor-pointer">
+          <i data-lucide="search-check" class="w-4.5 h-4.5 shrink-0"></i>
+          <span class="truncate">Auditoría Digital</span>
+        </button>
+
+        <button onclick="navigateTo('solucion')" data-nav="solucion" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-left border-l-4 border-transparent cursor-pointer">
+          <i data-lucide="rocket" class="w-4.5 h-4.5 shrink-0"></i>
+          <span class="truncate">Propuesta de Solución</span>
+        </button>
+
+        <button onclick="navigateTo('planes')" data-nav="planes" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-left border-l-4 border-transparent cursor-pointer">
+          <i data-lucide="layers" class="w-4.5 h-4.5 shrink-0"></i>
+          <span class="truncate">Planes y Evolución</span>
+        </button>
+
+        <button onclick="navigateTo('monetizacion')" data-nav="monetizacion" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-left border-l-4 border-transparent cursor-pointer">
+          <i data-lucide="trending-up" class="w-4.5 h-4.5 shrink-0"></i>
+          <span class="truncate">Monetización y Fidelización</span>
+        </button>
+
+        <button onclick="navigateTo('cotizaciones')" data-nav="cotizaciones" class="nav-item w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-left border-l-4 border-transparent cursor-pointer">
+          <i data-lucide="file-text" class="w-4.5 h-4.5 shrink-0"></i>
+          <span class="truncate">Cotizaciones y Contacto</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer: Prospect Contact Card -->
+      <div class="p-4 border-t border-white/10 bg-[#011038]/60">
+        <div class="rounded-xl bg-white/5 border border-white/10 p-3.5">
+          <div class="flex items-center gap-2.5 mb-2.5">
+            <div class="w-8 h-8 rounded-full bg-[#fbd802] text-[#021851] flex items-center justify-center font-extrabold text-xs shrink-0">
+              CF
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-white truncate">Carla Finke Rivera</p>
+              <p class="text-[11px] text-slate-300 truncate">Contacto Principal</p>
+            </div>
+          </div>
+          <div class="space-y-1.5 text-[11px] text-slate-300">
+            <a href="tel:8099197379" class="flex items-center gap-2 hover:text-[#fbd802] transition-colors">
+              <i data-lucide="phone" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0"></i>
+              <span>809-919-7379</span>
+            </a>
+            <a href="mailto:paseodelcedro@gmail.com" class="flex items-center gap-2 hover:text-[#fbd802] transition-colors truncate">
+              <i data-lucide="mail" class="w-3.5 h-3.5 text-[#016fe9] shrink-0"></i>
+              <span class="truncate">paseodelcedro@gmail.com</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    <!-- ==================== RIGHT MAIN WORKSPACE ==================== -->
+    <div class="flex-1 lg:pl-72 flex flex-col min-w-0">
+
+      <!-- Sticky Top Header -->
+      <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 lg:px-8 py-3.5 shadow-2xs">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+          <!-- Left: Mobile Menu Trigger + Greeting -->
+          <div class="flex items-center gap-3 min-w-0">
+            <button onclick="toggleMobileSidebar(true)" class="lg:hidden p-2.5 rounded-xl border border-slate-200 bg-white text-[#021851] hover:bg-slate-50 transition-colors shrink-0" aria-label="Abrir menú">
+              <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="min-w-0">
+              <h1 class="text-base sm:text-lg font-extrabold text-[#021851] truncate">
+                Bienvenido, <span class="text-[#016fe9]">Carla</span>
+              </h1>
+              <p class="text-xs sm:text-sm text-slate-500 truncate">
+                Propuesta de Transformación Digital — Cedaky Mall
+              </p>
+            </div>
+          </div>
+
+          <!-- Right: Live Spanish Date/Clock + Primary CTA -->
+          <div class="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#f4f7fb] border border-slate-200 text-xs font-semibold text-[#021851]">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-[#016fe9] shrink-0"></i>
+              <span id="live-clock" class="tabular-nums">Cargando fecha y hora...</span>
+            </div>
+
+            <button onclick="openQuoteModal()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#016fe9] hover:bg-[#0158bd] text-white text-xs sm:text-sm font-bold shadow-sm shadow-[#016fe9]/30 transition-all cursor-pointer">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Descargar Cotizaciones</span>
+            </button>
+          </div>
+        </div>
+      </header>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+      <!-- Scrollable Main Content -->
+      <main id="main-content" class="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl w-full mx-auto">
+      
+      
+        <!-- ============================================================
+             SECTION 1: RESUMEN EJECUTIVO
+        ============================================================= -->
+        <section id="section-resumen" class="section-view active space-y-6">
+
+          <!-- Executive Location Hero Banner (#021851) -->
+          <div class="relative overflow-hidden rounded-2xl bg-[#021851] text-white p-6 sm:p-8 shadow-md border border-[#016fe9]/30">
+            <div class="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-[#016fe9]/25 blur-3xl pointer-events-none"></div>
+            <div class="absolute right-12 bottom-0 w-44 h-44 rounded-full bg-[#80cc1b]/15 blur-2xl pointer-events-none"></div>
+
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+              <div class="space-y-2.5 max-w-3xl">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fbd802] text-[#021851] text-xs font-extrabold">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    Resumen Ejecutivo
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-slate-200 text-xs font-semibold">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#80cc1b]"></i>
+                    Avenida Manolo Tavares Justo, Puerto Plata, Rep. Dom.
+                  </span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
+                  Auditoría de Presencia y Posicionamiento Digital: Cedaky Mall
+                </h2>
+                <p class="text-slate-300 text-sm sm:text-base">
+                  Diagnóstico integral y hoja de ruta tecnológica para alinear la huella digital con la magnitud real del centro comercial más completo de Puerto Plata.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap gap-2.5 shrink-0">
+                <button onclick="navigateTo('auditoria')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#016fe9] hover:bg-[#0158bd] text-white text-sm font-bold shadow-sm transition-all cursor-pointer">
+                  <span>Explorar Auditoría</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          
+          
+          
+
+          <!-- 5 KPI Metric Cards with 4 Brand Colors -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- KPI 1: Construcción (#021851) -->
+            <div class="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-[#021851] p-5 shadow-xs hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Construcción</span>
+                <div class="w-9 h-9 rounded-xl bg-[#021851]/10 text-[#021851] flex items-center justify-center">
+                  <i data-lucide="building-2" class="w-4.2 h-4.2"></i>
+                </div>
+              </div>
+              <p class="text-2xl font-extrabold text-[#021851]">31,000 m²</p>
+              <p class="text-xs text-slate-500 mt-1">Área de Construcción</p>
+            </div>
+
+            <!-- KPI 2: GLA (#80cc1b) -->
+            <div class="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-[#80cc1b] p-5 shadow-xs hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Área Rentable</span>
+                <div class="w-9 h-9 rounded-xl bg-[#f2fae6] text-[#69aa13] flex items-center justify-center">
+                  <i data-lucide="maximize-2" class="w-4.2 h-4.2"></i>
+                </div>
+              </div>
+              <p class="text-2xl font-extrabold text-[#021851]">18,200 m²</p>
+              <p class="text-xs text-slate-500 mt-1">Área Rentable (GLA)</p>
+            </div>
+
+            <!-- KPI 3: Parqueos (#016fe9) -->
+            <div class="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-[#016fe9] p-5 shadow-xs hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Parqueos</span>
+                <div class="w-9 h-9 rounded-xl bg-[#e8f3ff] text-[#016fe9] flex items-center justify-center">
+                  <i data-lucide="car" class="w-4.2 h-4.2"></i>
+                </div>
+              </div>
+              <p class="text-2xl font-extrabold text-[#021851]">120</p>
+              <p class="text-xs text-slate-500 mt-1">Estacionamientos</p>
+            </div>
+
+            <!-- KPI 4: Baños (#016fe9) -->
+            <div class="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-[#016fe9] p-5 shadow-xs hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Baños</span>
+                <div class="w-9 h-9 rounded-xl bg-[#e8f3ff] text-[#016fe9] flex items-center justify-center">
+                  <i data-lucide="door-open" class="w-4.2 h-4.2"></i>
+                </div>
+              </div>
+              <p class="text-2xl font-extrabold text-[#021851]">19</p>
+              <p class="text-xs text-slate-500 mt-1">Instalaciones sanitarias</p>
+            </div>
+
+            <!-- KPI 5: Tenants (#fbd802) -->
+            <div class="bg-white rounded-2xl border border-slate-200 border-t-4 border-t-[#fbd802] p-5 shadow-xs hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Tenants</span>
+                <div class="w-9 h-9 rounded-xl bg-[#fbd802] text-[#021851] flex items-center justify-center">
+                  <i data-lucide="store" class="w-4.2 h-4.2"></i>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <p class="text-2xl font-extrabold text-[#021851]">16</p>
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#fbd802] text-[#021851]">Comercialización</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Tenants Actuales (Fase activa)</p>
+            </div>
+          </div>
+          
+          
+          
+          
+          
+
+          <!-- Two-Column Area: Contrast Chart + Video & Digital Channels -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Column: Physical vs Digital Contrast + Chart.js -->
+            <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-5">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fbd802] text-[#021851] text-xs font-extrabold">
+                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                    Brecha Estratégica Identificada
+                  </span>
+                  <span class="text-xs text-slate-400 font-semibold">Escala Comparativa (0–100)</span>
+                </div>
+                <h3 class="text-lg font-extrabold text-[#021851] mb-2">
+                  Contraste: Magnitud Física vs. Huella Digital
+                </h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Físicamente, Cedaky Mall es una infraestructura imponente con <strong>31,000 m²</strong> de construcción, <strong>18,200 m²</strong> de área rentable (GLA), 120 parqueos, 19 baños y 16 inquilinos en comercialización. Sin embargo, a pesar de ser el <strong>"centro comercial más completo de Puerto Plata"</strong>, su ecosistema digital actual opera como un negocio local pequeño y desarticulado.
+                </p>
+              </div>
+              
+              
+              
+
+              <!-- Chart.js Horizontal Bar Chart -->
+              <div class="bg-[#f4f7fb] rounded-xl border border-slate-200/90 p-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#021851]">Magnitud Física vs. Madurez Digital Actual</h4>
+                  <div class="flex items-center gap-3 text-xs font-semibold">
+                    <span class="flex items-center gap-1.5 text-[#021851]">
+                      <span class="w-2.5 h-2.5 rounded-full bg-[#80cc1b]"></span>Magnitud Física
+                    </span>
+                    <span class="flex items-center gap-1.5 text-[#021851]">
+                      <span class="w-2.5 h-2.5 rounded-full bg-[#fbd802] border border-[#021851]/30"></span>Madurez Digital Actual
+                    </span>
+                  </div>
+                </div>
+                <div class="relative w-full h-64">
+                  <canvas id="contrastChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: YouTube Embed + Channels + Más Fotos -->
+            <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-5">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <div>
+                    <h3 class="text-base font-extrabold text-[#021851] flex items-center gap-2">
+                      <i data-lucide="play-circle" class="w-5 h-5 text-[#016fe9]"></i>
+                      <span>Vista del Centro Comercial</span>
+                    </h3>
+                    <p class="text-xs text-slate-500">Recorrido audiovisual · Puerto Plata</p>
+                  </div>
+                  <button onclick="openGalleryModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#e8f3ff] hover:bg-[#016fe9] text-[#016fe9] hover:text-white text-xs font-bold transition-colors cursor-pointer">
+                    <i data-lucide="images" class="w-3.5 h-3.5"></i>
+                    <span>Más fotos</span>
+                  </button>
+                </div>
+
+                <!-- Responsive 16:9 YouTube Video Embed -->
+                <div class="relative w-full pt-[56.25%] rounded-xl overflow-hidden bg-[#021851] border border-slate-200 shadow-inner">
+                  <iframe
+                    class="absolute inset-0 w-full h-full"
+                    src="https://www.youtube.com/embed/XfLuohdXVZ4"
+                    title="Cedaky Mall Puerto Plata"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen
+                  ></iframe>
+                </div>
+              </div>
+              
+              
+              
+
+              <!-- Active Digital Channels Card -->
+              <div class="space-y-2.5 pt-3 border-t border-slate-100">
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Canales Digitales Actuales</h4>
+
+               <!-- Instagram -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-[#f4f7fb] border border-slate-200/80">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-[#fff] flex items-center justify-center overflow-hidden">
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
+                        alt="Instagram Logo"
+                        class="w-5 h-5 object-contain"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<i data-lucide=\'instagram\' class=\'w-4 h-4 text-[#016fe9]\'></i>'; if(window.lucide) lucide.createIcons();"
+                      />
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold text-[#021851]">Instagram</p>
+                      <p class="text-xs text-slate-500">Reels y actividades del mall</p>
+                    </div>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full bg-[#f2fae6] border border-[#80cc1b]/40 text-[#021851] text-xs font-extrabold">
+                    13.1K seguidores
+                  </span>
+                </div>
+                
+                
+                
+                
+
+                <!-- Facebook -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-[#f4f7fb] border border-slate-200/80">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-[#fff] flex items-center justify-center overflow-hidden">
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg"
+                        alt="Facebook Logo"
+                        class="w-5 h-5 object-contain"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<i data-lucide=\'facebook\' class=\'w-4 h-4 text-[#021851]\'></i>'; if(window.lucide) lucide.createIcons();"
+                      />
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold text-[#021851]">Facebook</p>
+                      <p class="text-xs text-slate-500">Promociones, eventos y ferias</p>
+                    </div>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full bg-[#e8f3ff] text-[#016fe9] text-xs font-extrabold">
+                    Activo
+                  </span>
+                </div>
+                
+                
+                
+                
+
+                <!-- Google Business -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-[#f4f7fb] border border-slate-200/80">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-[#fff] flex items-center justify-center overflow-hidden">
+                      <img
+                        src="https://ik.imagekit.io/bebell/ICONS/logos/Google_Google_Business_1.png?updatedAt=1794300456330"
+                        alt="Google Business Logo"
+                        class="w-5 h-5 object-contain"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<i data-lucide=\'map-pinned\' class=\'w-4 h-4 text-[#021851]\'></i>'; if(window.lucide) lucide.createIcons();"
+                      />
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold text-[#021851]">Google Business</p>
+                      <p class="text-xs text-slate-500">27 reseñas · Sin sitio web</p>
+                    </div>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full bg-[#fbd802] text-[#021851] text-xs font-extrabold">
+                    3.8 ★
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <!-- ============================================================
+             SECTION 2: AUDITORÍA DIGITAL
+        ============================================================= -->
+        <section id="section-auditoria" class="section-view space-y-6">
+
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <span class="text-xs font-extrabold uppercase tracking-wider text-[#016fe9]">Diagnóstico de Presencia</span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-[#021851] max-w-3xl mt-0.5">
+                AUDITORÍA DE PRESENCIA Y POSICIONAMIENTO DIGITAL: CEDAKY MALL
+              </h2>
+            </div>
+            <span class="inline-flex items-center gap-1.5 self-start px-3.5 py-1.5 rounded-full bg-[#fbd802] text-[#021851] text-xs font-extrabold shadow-xs">
+              <i data-lucide="shield-alert" class="w-4 h-4"></i>
+              Ecosistema Desarticulado
+            </span>
+          </div>
+          
+          
+
+          <!-- Card 1: Contraste Magnitud Física vs Huella Digital -->
+          <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-[#021851] p-6 shadow-xs">
+            <div class="flex items-start gap-3.5">
+              <div class="w-11 h-11 rounded-xl bg-[#021851] text-[#fbd802] flex items-center justify-center shrink-0">
+                <i data-lucide="scale" class="w-5 h-5"></i>
+              </div>
+              <div class="space-y-2">
+                <h3 class="text-lg font-extrabold text-[#021851]">1. Contraste: Magnitud Física vs. Huella Digital</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Para entender la brecha en la identidad comercial, primero debemos dimensionar el tamaño real del proyecto. Físicamente, Cedaky Mall es una infraestructura imponente ubicada en la <strong>Avenida Manolo Tavares Justo, Puerto Plata</strong>. Cuenta con un área de construcción total de <strong>31,000 m²</strong> y un área rentable (GLA) de <strong>18,200 m²</strong>. La plaza está equipada con <strong>120 parqueos</strong>, <strong>19 baños</strong> y actualmente alberga a <strong>16 inquilinos</strong> en su fase de comercialización.
+                </p>
+                <p class="text-sm text-slate-700 leading-relaxed font-medium">
+                  A pesar de ser el <span class="text-[#016fe9] font-bold">"centro comercial más completo de Puerto Plata"</span> y tener una escala tan masiva, su ecosistema digital actual no refleja esta magnitud y opera más como un negocio local pequeño y desarticulado.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 & Card 3 Side-by-Side -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Card 2: SEO Local -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-[#e8f3ff] text-[#016fe9] flex items-center justify-center shrink-0">
+                  <i data-lucide="globe" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-base font-extrabold text-[#021851]">2. Análisis de Presencia en Motores de Búsqueda (SEO Local)</h3>
+                  <p class="text-xs text-slate-500">Deficiencias críticas en Google que afectan autoridad e imagen</p>
+                </div>
+              </div>
+
+              <!-- Google Business Profile -->
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-2">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                  <h4 class="text-sm font-extrabold text-[#021851]">Ficha de Google Business Profile</h4>
+                  <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#021851] text-white text-xs font-bold">
+                    <span class="text-[#fbd802] tracking-tighter">★★★★☆</span>
+                    <span>3.8 (27 reseñas)</span>
+                  </div>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  La ficha existe, pero está <strong>desatendida</strong>. Tiene una carencia fundamental: <strong>no posee una página web vinculada</strong> y la plataforma sugiere activamente <span class="px-1.5 py-0.5 rounded bg-[#fbd802] text-[#021851] font-bold text-xs">"Añadir sitio web"</span>. Esta es la primera impresión que tienen turistas y locales al buscar cómo llegar a la plaza.
+                </p>
+              </div>
+
+              <!-- SERPs -->
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-2">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                  <h4 class="text-sm font-extrabold text-[#021851]">Resultados Orgánicos (SERPs)</h4>
+                  <span class="px-2.5 py-0.5 rounded-full bg-[#fbd802] text-[#021851] text-xs font-extrabold">Sin dominio propio</span>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Al buscar <strong>"cedaky mall"</strong> en Google, los primeros resultados que dominan son sus perfiles de Instagram y Facebook, seguidos de menciones en sitios de terceros como la <strong>Cámara de Comercio y Producción de Puerto Plata</strong> y agencias de bienes raíces como <strong>Smart Solutions Management</strong>. Al no tener dominio propio, cede el control total de su narrativa y SEO a terceros.
+                </p>
+              </div>
+            </div>
+
+
+
+            <!-- Card 3: Redes Sociales -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-[#f2fae6] text-[#69aa13] flex items-center justify-center shrink-0">
+                  <i data-lucide="share-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-base font-extrabold text-[#021851]">3. Auditoría de Redes Sociales y Alcance</h3>
+                  <p class="text-xs text-slate-500">Presencia activa en Instagram y Facebook sin marca unificada</p>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border border-slate-200">
+                <div class="flex items-center justify-between mb-1">
+                  <h4 class="text-sm font-extrabold text-[#021851] flex items-center gap-1.5">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"
+                      alt="Instagram Logo"
+                      class="w-4 h-4 object-contain"
+                      onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<i data-lucide=\'instagram\' class=\'w-4 h-4 text-[#016fe9]\'></i>'); if(window.lucide) lucide.createIcons();"
+                    />
+                    Instagram
+                  </h4>
+                  <span class="px-2.5 py-0.5 rounded-full bg-[#80cc1b] text-[#021851] text-xs font-extrabold">13.1K seguidores</span>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Es su canal más fuerte, donde publican Reels y videos cortos promoviendo actividades de la plaza.
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border border-slate-200">
+                <div class="flex items-center justify-between mb-1">
+                  <h4 class="text-sm font-extrabold text-[#021851] flex items-center gap-1.5">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg"
+                      alt="Facebook Logo"
+                      class="w-4 h-4 object-contain"
+                      onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<i data-lucide=\'facebook\' class=\'w-4 h-4 text-[#016fe9]\'></i>'); if(window.lucide) lucide.createIcons();"
+                    />
+                    Facebook
+                  </h4>
+                  <span class="px-2.5 py-0.5 rounded-full bg-[#e8f3ff] text-[#016fe9] text-xs font-extrabold">Miles de seguidores</span>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Publican contenido visual variado: promociones de descuentos del <strong>50% en tiendas como Payless</strong>, eventos de Pascua, ferias de empleo, anuncios de comida y campañas de salud.
+                </p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#fffbe6] border border-[#fbd802]">
+                <h4 class="text-sm font-extrabold text-[#021851] flex items-center gap-1.5 mb-1">
+                  <i data-lucide="alert-circle" class="w-4 h-4 text-[#021851]"></i>
+                  Falta de Identidad y Profesionalismo Comercial
+                </h4>
+                <p class="text-sm text-[#021851]/90 leading-relaxed">
+                  Utilizan un correo gratuito (<code class="px-1.5 py-0.5 rounded bg-white font-mono text-xs font-bold">cedakymall@gmail.com</code>) en lugar de un correo corporativo. Las imágenes de portada y gráficas muestran una mezcla de logotipos e identidades visuales que no consolidan una marca unificada.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Brechas Identificadas (3 Numbered Visual Diagnostic Cards) -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+            <div>
+              <h3 class="text-lg font-extrabold text-[#021851]">4. Brechas Identificadas (Diagnóstico del Problema)</h3>
+              <p class="text-xs text-slate-500">Factores críticos que frenan la autoridad y captación comercial</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <!-- Gap 1 (#021851) -->
+              <div class="rounded-2xl bg-[#f4f7fb] border-t-4 border-t-[#021851] border-x border-b border-slate-200 p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="w-9 h-9 rounded-xl bg-[#021851] text-[#fbd802] font-extrabold text-sm flex items-center justify-center">01</span>
+                  <span class="px-2.5 py-0.5 rounded-full bg-[#fbd802] text-[#021851] text-[11px] font-extrabold">Riesgo Crítico</span>
+                </div>
+                <h4 class="text-base font-extrabold text-[#021851]">Falta de "Tierra Propia" (Owned Media)</h4>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Cedaky Mall construye su audiencia en <strong>"tierra alquilada"</strong> (Instagram y Facebook). Si alguna plataforma cambia su algoritmo o suspende la cuenta, la plaza perdería su único canal de comunicación con el público.
+                </p>
+              </div>
+
+              <!-- Gap 2 (#016fe9) -->
+              <div class="rounded-2xl bg-[#f4f7fb] border-t-4 border-t-[#016fe9] border-x border-b border-slate-200 p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="w-9 h-9 rounded-xl bg-[#016fe9] text-white font-extrabold text-sm flex items-center justify-center">02</span>
+                  <span class="px-2.5 py-0.5 rounded-full bg-[#e8f3ff] text-[#016fe9] text-[11px] font-extrabold">Falta de Directorio</span>
+                </div>
+                <h4 class="text-base font-extrabold text-[#021851]">Invisibilidad del Directorio de Inquilinos</h4>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Tienen <strong>16 inquilinos activos</strong> en un área rentable enorme, pero un usuario no tiene forma rápida, oficial y centralizada de ver un directorio de tiendas, horarios individuales o mapa del mall; dependen de posts esporádicos.
+                </p>
+              </div>
+
+              <!-- Gap 3 (#fbd802) -->
+              <div class="rounded-2xl bg-[#f4f7fb] border-t-4 border-t-[#fbd802] border-x border-b border-slate-200 p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="w-9 h-9 rounded-xl bg-[#fbd802] text-[#021851] font-extrabold text-sm flex items-center justify-center">03</span>
+                  <span class="px-2.5 py-0.5 rounded-full bg-[#021851] text-[#fbd802] text-[11px] font-extrabold">Fuga Orgánica</span>
+                </div>
+                <h4 class="text-base font-extrabold text-[#021851]">Fuga de Tráfico Turístico / Local</h4>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Una calificación de <strong>3.8 en Google</strong> sin un sitio web para corroborar información genera desconfianza. Quienes buscan <em>"qué hacer en Puerto Plata"</em> o <em>"tiendas en Puerto Plata"</em> difícilmente los encuentran de forma orgánica.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <!-- ============================================================
+             SECTION 3: PROPUESTA DE SOLUCIÓN
+        ============================================================= -->
+        <section id="section-solucion" class="section-view space-y-6">
+
+          <!-- Header -->
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-[#016fe9]">Propuesta de Solución 🚀</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#021851] mt-0.5">
+              DESARROLLO DE PÁGINA WEB COMERCIAL
+            </h2>
+            <p class="text-sm text-slate-600 mt-1 max-w-3xl">
+              Para solucionar este abandono de identidad, Cedaky Mall necesita urgentemente profesionalizar su huella digital mediante una página web comercial que funcione como eje central de toda su estrategia.
+            </p>
+          </div>
+
+          <!-- Paradigm Shift Banner (#021851 with #fbd802 & #80cc1b highlights) -->
+          <div class="rounded-2xl bg-[#021851] text-white p-6 sm:p-8 shadow-md border border-[#016fe9]/30 space-y-4">
+            <p class="text-lg sm:text-2xl font-extrabold leading-snug">
+              Cedaky Mall no necesita solo presencia digital. Necesita convertirse en un <span class="text-[#fbd802]">canal propio de ventas, comunicación y crecimiento.</span>
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              <div class="flex items-center gap-3 p-3.5 rounded-xl bg-white/5 border border-white/10">
+                <span class="px-2.5 py-1 rounded-lg bg-[#fbd802] text-[#021851] text-xs font-extrabold shrink-0">HOY</span>
+                <span class="text-sm text-slate-200 font-medium">Dependen exclusivamente del tráfico físico.</span>
+              </div>
+              <div class="flex items-center gap-3 p-3.5 rounded-xl bg-[#80cc1b]/15 border border-[#80cc1b]/40">
+                <span class="px-2.5 py-1 rounded-lg bg-[#80cc1b] text-[#021851] text-xs font-extrabold shrink-0">MAÑANA</span>
+                <span class="text-sm text-white font-bold">Pueden capturar, medir y monetizar tráfico digital.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Problema Actual Checklist Card -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+            <h3 class="text-sm font-extrabold uppercase tracking-wider text-[#021851] mb-4 flex items-center gap-2">
+              <i data-lucide="alert-octagon" class="w-4.5 h-4.5 text-[#016fe9]"></i>
+              Problema Actual
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200 flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-md bg-[#fbd802] text-[#021851] flex items-center justify-center shrink-0 mt-0.5 font-extrabold text-xs">!</span>
+                <p class="text-sm text-slate-700 font-medium">Las marcas dentro del mall operan de forma aislada.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200 flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-md bg-[#fbd802] text-[#021851] flex items-center justify-center shrink-0 mt-0.5 font-extrabold text-xs">!</span>
+                <p class="text-sm text-slate-700 font-medium">No hay data centralizada de clientes.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200 flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-md bg-[#fbd802] text-[#021851] flex items-center justify-center shrink-0 mt-0.5 font-extrabold text-xs">!</span>
+                <p class="text-sm text-slate-700 font-medium">No existe canal directo de comunicación con visitantes.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200 flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-md bg-[#fbd802] text-[#021851] flex items-center justify-center shrink-0 mt-0.5 font-extrabold text-xs">!</span>
+                <p class="text-sm text-slate-700 font-medium">Se pierde oportunidad de ventas fuera del espacio físico.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5 Solution Pillars Grid -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-extrabold text-[#021851]">¿Cómo resolverá el sitio web los problemas actuales?</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              <!-- Pillar 1 -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:border-[#016fe9] transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-[#e8f3ff] text-[#016fe9] flex items-center justify-center mb-4">
+                  <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-base font-extrabold text-[#021851] mb-2">Directorio Comercial Interactivo (Hub de Inquilinos)</h4>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Organiza a los <strong>16 inquilinos</strong> (y futuros) en un directorio categorizado (moda, comida, servicios, entretenimiento), brindando valor añadido y exposición garantizada a los negocios que alquilan en el mall.
+                </p>
+              </div>
+
+              <!-- Pillar 2 -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:border-[#016fe9] transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-[#f2fae6] text-[#69aa13] flex items-center justify-center mb-4">
+                  <i data-lucide="mail-check" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-base font-extrabold text-[#021851] mb-2">Profesionalización de la Comunicación</h4>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Adquisición de dominio oficial (ej. <code class="px-1.5 py-0.5 rounded bg-[#f4f7fb] text-[#021851] font-mono text-xs font-bold">cedakymall.com</code>) y correos corporativos (<code class="px-1.5 py-0.5 rounded bg-[#f4f7fb] text-[#021851] font-mono text-xs font-bold">info@cedakymall.com</code>), eliminando cuentas @gmail.com para la administración y alquiler de los 18,200 m².
+                </p>
+              </div>
+
+              <!-- Pillar 3 -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:border-[#016fe9] transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-[#fbd802] text-[#021851] flex items-center justify-center mb-4">
+                  <i data-lucide="search-code" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-base font-extrabold text-[#021851] mb-2">Optimización SEO y Reclamación de Google Business</h4>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Vinculación inmediata a Google Business, llenando el vacío de información actual. Con descripciones, palabras clave locales y blog de eventos, captura búsquedas de alta intención en turismo y compras en Puerto Plata.
+                </p>
+              </div>
+
+              <!-- Pillar 4 -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:border-[#016fe9] transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-[#e8f3ff] text-[#016fe9] flex items-center justify-center mb-4">
+                  <i data-lucide="palette" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-base font-extrabold text-[#021851] mb-2">Uniformidad y Branding</h4>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Establece el libro de marca definitivo: colores, tipografía y tono de voz, sirviendo de brújula para que el contenido disperso en redes sociales cobre coherencia y prestigio.
+                </p>
+              </div>
+
+              <!-- Pillar 5 -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:border-[#016fe9] transition-colors md:col-span-2">
+                <div class="w-10 h-10 rounded-xl bg-[#021851] text-[#fbd802] flex items-center justify-center mb-4">
+                  <i data-lucide="briefcase" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-base font-extrabold text-[#021851] mb-2">Centralización de Inversión y Comercialización (B2B)</h4>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  Para un proyecto con <strong>31,000 m²</strong> de construcción, una web sólida no solo atrae compradores desde internet, sino que funciona como una herramienta <strong>B2B crucial</strong> para captar nuevos inversionistas y franquicias que deseen ocupar los locales aún disponibles.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Highlighted Callout Box (#016fe9 & #fbd802 accent): MailerBox & HelpDesk -->
+          <div class="rounded-2xl bg-[#e8f3ff] border-2 border-[#016fe9] border-l-8 border-l-[#fbd802] p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-[#016fe9] text-white flex items-center justify-center shrink-0 shadow-sm">
+              <i data-lucide="headset" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <span class="inline-block px-2.5 py-0.5 rounded-full bg-[#fbd802] text-[#021851] text-[11px] font-extrabold uppercase tracking-wider mb-1">
+                Recomendación Tecnológica Complementaria
+              </span>
+              <p class="text-sm sm:text-base font-bold text-[#021851] leading-relaxed">
+                Contratar un servicio como <a href="https://www.mailerbox.me/" target="_blank" rel="noopener noreferrer" class="text-[#016fe9] decoration-[#016fe9]/40 hover:decoration-[#016fe9] hover:text-[#80cc1b] transition-colors">MailerBox</a> para las cuentas de correos comerciales y <a href="https://www.helpdesk.icu/" target="_blank" rel="noopener noreferrer" class="text-[#016fe9] decoration-[#016fe9]/40 hover:decoration-[#016fe9] hover:text-[#80cc1b] transition-colors">HelpDesk</a> para gestionar todos los canales de comunicación chats.
+              </p>
+            </div>
+          </div>
+
+          <!-- Executive Conclusion Quote Box -->
+          <div class="rounded-2xl bg-[#021851] text-slate-200 p-6 sm:p-7 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-[#80cc1b] text-[#021851] flex items-center justify-center shrink-0">
+              <i data-lucide="award" class="w-6 h-6"></i>
+            </div>
+            <p class="text-sm sm:text-base leading-relaxed">
+              <strong class="text-white">En conclusión:</strong> El estado actual de Cedaky Mall en internet depende excesivamente de la inmediatez de las redes sociales, sacrificando autoridad, prestigio y posicionamiento a largo plazo. El desarrollo de una web comercial <strong class="text-[#fbd802]">no es un gasto</strong>, sino el paso estructural necesario para que su imagen digital finalmente iguale la imponente infraestructura física que han construido en Puerto Plata.
+            </p>
+          </div>
+        </section>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <!-- ============================================================
+             SECTION 4: PLANES Y EVOLUCIÓN
+        ============================================================= -->
+        <section id="section-planes" class="section-view space-y-6">
+
+          <!-- Header -->
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-[#016fe9]">Arquitectura de Crecimiento</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#021851] mt-0.5">Propuesta: Dos Niveles de Evolución</h2>
+            <p class="text-sm text-slate-500 mt-1">Desde presencia digital estructurada hasta una plaza comercial digital completa con App móvil.</p>
+          </div>
+
+          <!-- Side-by-Side Comparison Cards -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+
+            <!-- PLAN 1: PLAN AVANZADO (#016fe9 accents) -->
+            <div class="bg-white rounded-2xl border-2 border-[#016fe9]/30 shadow-xs overflow-hidden flex flex-col justify-between">
+              <div>
+                <div class="bg-[#e8f3ff] px-6 py-5 border-b border-[#016fe9]/20 flex items-start justify-between gap-3">
+                  <div>
+                    <span class="inline-block px-2.5 py-0.5 rounded-full bg-[#016fe9] text-white text-[11px] font-extrabold uppercase tracking-wider mb-1.5">
+                      Nivel 1 · Punto de Entrada
+                    </span>
+                    <h3 class="text-xl font-extrabold text-[#021851]">Plan 1: Plataforma Web Informativa</h3>
+                    <p class="text-sm font-bold text-[#016fe9]">(Plan Avanzado)</p>
+                  </div>
+                  <div class="w-11 h-11 rounded-xl bg-white text-[#016fe9] flex items-center justify-center shrink-0 shadow-xs">
+                    <i data-lucide="globe-2" class="w-5 h-5"></i>
+                  </div>
+                </div>
+
+                <div class="p-6 space-y-5">
+                  <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200">
+                    <p class="text-[11px] font-extrabold uppercase tracking-wider text-[#016fe9]">Objetivo</p>
+                    <p class="text-sm font-bold text-[#021851] mt-0.5">Presencia sólida + base para escalar</p>
+                  </div>
+
+                  <div>
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3">Incluye:</h4>
+                    <ul class="space-y-2.5 text-sm text-slate-700">
+                      <li class="flex items-start gap-2.5">
+                        <i data-lucide="check-circle-2" class="w-4.5 h-4.5 text-[#016fe9] shrink-0 mt-0.5"></i>
+                        <span>Página web moderna y optimizada</span>
+                      </li>
+                      <li class="flex items-start gap-2.5">
+                        <i data-lucide="check-circle-2" class="w-4.5 h-4.5 text-[#016fe9] shrink-0 mt-0.5"></i>
+                        <span>Directorio completo de tiendas y marcas</span>
+                      </li>
+                      <li class="flex items-start gap-2.5">
+                        <i data-lucide="check-circle-2" class="w-4.5 h-4.5 text-[#016fe9] shrink-0 mt-0.5"></i>
+                        <div>
+                          <span class="font-bold text-[#021851]">Perfil individual por negocio:</span>
+                          <div class="flex flex-wrap gap-1.5 mt-1.5">
+                            <span class="px-2 py-0.5 rounded-md bg-[#f4f7fb] border border-slate-200 text-[#021851] text-xs font-medium">Descripción</span>
+                            <span class="px-2 py-0.5 rounded-md bg-[#f4f7fb] border border-slate-200 text-[#021851] text-xs font-medium">Horarios</span>
+                            <span class="px-2 py-0.5 rounded-md bg-[#f4f7fb] border border-slate-200 text-[#021851] text-xs font-medium">Ubicación dentro del mall</span>
+                            <span class="px-2 py-0.5 rounded-md bg-[#f4f7fb] border border-slate-200 text-[#021851] text-xs font-medium">Contacto directo</span>
+                          </div>
+                        </div>
+                      </li>
+                      <li class="flex items-start gap-2.5">
+                        <i data-lucide="check-circle-2" class="w-4.5 h-4.5 text-[#016fe9] shrink-0 mt-0.5"></i>
+                        <span>Sección de eventos y promociones</span>
+                      </li>
+                      <li class="flex items-start gap-2.5">
+                        <i data-lucide="check-circle-2" class="w-4.5 h-4.5 text-[#016fe9] shrink-0 mt-0.5"></i>
+                        <span>Integración con redes sociales</span>
+                      </li>
+                      <li class="flex items-start gap-2.5">
+                        <i data-lucide="check-circle-2" class="w-4.5 h-4.5 text-[#016fe9] shrink-0 mt-0.5"></i>
+                        <span>Preparación técnica para futura expansión a e-commerce</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-6 pb-6 pt-4 border-t border-slate-100 space-y-4">
+                <div>
+                  <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Valor Real</h4>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div class="p-2.5 rounded-xl bg-[#e8f3ff] text-[#021851] text-xs font-bold text-center">Centraliza toda la información</div>
+                    <div class="p-2.5 rounded-xl bg-[#e8f3ff] text-[#021851] text-xs font-bold text-center">Mejora experiencia del visitante</div>
+                    <div class="p-2.5 rounded-xl bg-[#e8f3ff] text-[#021851] text-xs font-bold text-center">Primer paso digital estructurado</div>
+                  </div>
+                </div>
+                <button onclick="selectPlanAndOpenQuote('Plan Avanzado')" class="w-full py-3 px-4 rounded-xl border-2 border-[#016fe9] text-[#016fe9] hover:bg-[#016fe9] hover:text-white text-sm font-extrabold transition-all cursor-pointer">
+                  Cotizar Plan Avanzado
+                </button>
+              </div>
+            </div>
+
+            <!-- PLAN 2: PLAN ILIMITADO + APP (FEATURED: #021851 header, #fbd802 badge, #80cc1b checkmarks) -->
+            <div class="bg-white rounded-2xl border-2 border-[#021851] shadow-lg overflow-hidden flex flex-col justify-between">
+              <div>
+                <div class="bg-[#021851] text-white px-6 py-5 flex items-start justify-between gap-3">
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fbd802] text-[#021851] text-[11px] font-extrabold uppercase tracking-wider">
+                        <i data-lucide="star" class="w-3 h-3"></i>
+                        Recomendado
+                      </span>
+                      <span class="text-[11px] font-semibold text-[#80cc1b]">Nivel 2 · Crecimiento Real</span>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-white">Plan 2: Plataforma Comercial Completa</h3>
+                    <p class="text-sm font-bold text-[#fbd802]">(Plan Ilimitado + App)</p>
+                  </div>
+                  <div class="w-11 h-11 rounded-xl bg-white/10 border border-white/15 text-[#80cc1b] flex items-center justify-center shrink-0">
+                    <i data-lucide="smartphone" class="w-5 h-5"></i>
+                  </div>
+                </div>
+
+                <div class="p-6 space-y-5">
+                  <div class="p-3.5 rounded-xl bg-[#f2fae6] border border-[#80cc1b]/40">
+                    <p class="text-[11px] font-extrabold uppercase tracking-wider text-[#69aa13]">Objetivo</p>
+                    <p class="text-sm font-extrabold text-[#021851] mt-0.5">Convertir Cedaky Mall en una plaza comercial digital</p>
+                  </div>
+
+                  <!-- Modules Grid -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- E-Commerce -->
+                    <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-1.5">
+                      <h4 class="text-xs font-extrabold text-[#021851] flex items-center gap-1.5">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 text-[#80cc1b]"></i>
+                        E-Commerce Multi-Tienda
+                      </h4>
+                      <ul class="space-y-1 text-xs text-slate-600">
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Cada tienda vende en la plataforma</li>
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Catálogo digital unificado</li>
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Carrito de compras centralizado</li>
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Pagos electrónicos</li>
+                      </ul>
+                    </div>
+
+                    <!-- App Móvil -->
+                    <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-1.5">
+                      <h4 class="text-xs font-extrabold text-[#021851] flex items-center gap-1.5">
+                        <i data-lucide="smartphone" class="w-4 h-4 text-[#80cc1b]"></i>
+                        Aplicación Móvil (Android + iOS)
+                      </h4>
+                      <ul class="space-y-1 text-xs text-slate-600">
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Acceso directo desde el celular</li>
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Notificaciones push</li>
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Promociones en tiempo real</li>
+                      </ul>
+                    </div>
+
+                    <!-- Panel Administrativo -->
+                    <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-1.5">
+                      <h4 class="text-xs font-extrabold text-[#021851] flex items-center gap-1.5">
+                        <i data-lucide="sliders" class="w-4 h-4 text-[#80cc1b]"></i>
+                        Panel Administrativo
+                      </h4>
+                      <ul class="space-y-1 text-xs text-slate-600">
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Control total de tiendas y productos</li>
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Gestión de promociones</li>
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Control centralizado de datos</li>
+                      </ul>
+                    </div>
+
+                    <!-- Sistema de Usuarios y Fidelización -->
+                    <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-1.5">
+                      <h4 class="text-xs font-extrabold text-[#021851] flex items-center gap-1.5">
+                        <i data-lucide="gift" class="w-4 h-4 text-[#80cc1b]"></i>
+                        Usuarios + Fidelización
+                      </h4>
+                      <ul class="space-y-1 text-xs text-slate-600">
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Registro, historial y segmentación</li>
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Acumulación de puntos por compras</li>
+                        <li class="flex items-start gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-[#80cc1b] shrink-0 mt-0.5"></i>Incentivos y campañas dirigidas</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-6 pb-6 pt-4 border-t border-slate-100 space-y-4">
+                <div>
+                  <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Valor Real</h4>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="p-2.5 rounded-xl bg-[#f2fae6] border border-[#80cc1b]/40 text-[#021851] text-xs font-bold text-center">Nuevo canal de ingresos</div>
+                    <div class="p-2.5 rounded-xl bg-[#f2fae6] border border-[#80cc1b]/40 text-[#021851] text-xs font-bold text-center">Datos propios de clientes</div>
+                    <div class="p-2.5 rounded-xl bg-[#f2fae6] border border-[#80cc1b]/40 text-[#021851] text-xs font-bold text-center">Mayor frecuencia de compra</div>
+                    <div class="p-2.5 rounded-xl bg-[#f2fae6] border border-[#80cc1b]/40 text-[#021851] text-xs font-bold text-center">Relación directa con consumidor</div>
+                  </div>
+                </div>
+                <button onclick="selectPlanAndOpenQuote('Plan Ilimitado')" class="w-full py-3 px-4 rounded-xl bg-[#016fe9] hover:bg-[#0158bd] text-white text-sm font-extrabold shadow-md shadow-[#016fe9]/25 transition-all cursor-pointer">
+                  Cotizar Plan Ilimitado + App
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Difference Summary Bar -->
+          <div class="rounded-2xl bg-[#021851] text-white p-6 shadow-sm border border-[#016fe9]/30">
+            <p class="text-xs font-extrabold uppercase tracking-widest text-[#fbd802] text-center mb-4">Diferencia Clave Entre Ambos</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="p-4 rounded-xl bg-white/10 border border-white/15 flex items-center justify-between gap-3">
+                <span class="text-sm font-extrabold text-white">Plan Avanzado</span>
+                <span class="text-sm font-bold text-[#fbd802]">= Presencia + Organización</span>
+              </div>
+              <div class="p-4 rounded-xl bg-[#016fe9]/25 border border-[#80cc1b]/60 flex items-center justify-between gap-3">
+                <span class="text-sm font-extrabold text-white">Plan Ilimitado</span>
+                <span class="text-sm font-extrabold text-[#80cc1b]">= Ventas + Data + Más Control</span>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <!-- ============================================================
+             SECTION 5: MONETIZACIÓN Y FIDELIZACIÓN
+        ============================================================= -->
+        <section id="section-monetizacion" class="section-view space-y-6">
+
+          <!-- Header -->
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-[#016fe9]">Retorno y Propiedad de Audiencia</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#021851] mt-0.5">Monetización y Fidelización</h2>
+            <p class="text-sm text-slate-500 mt-1">Convierta la plataforma digital en un motor recurrente de ingresos y relación directa con cada visitante.</p>
+          </div>
+
+          <!-- Monetization Engine (#80cc1b icons) -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <h3 class="text-lg font-extrabold text-[#021851] flex items-center gap-2">
+                <i data-lucide="coins" class="w-5 h-5 text-[#80cc1b]"></i>
+                <span>Ingresos Recurrentes de la Plataforma</span>
+              </h3>
+              <span class="px-3 py-1 rounded-full bg-[#f2fae6] border border-[#80cc1b]/50 text-[#021851] text-xs font-extrabold self-start">
+                4 Fuentes de Monetización
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-2">
+                <div class="w-10 h-10 rounded-xl bg-[#80cc1b] text-[#021851] flex items-center justify-center">
+                  <i data-lucide="percent" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-sm font-extrabold text-[#021851]">Comisión por venta</h4>
+                <p class="text-xs text-slate-600 leading-relaxed">Ingresos directos por cada compra concretada dentro de la plataforma e-commerce.</p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-2">
+                <div class="w-10 h-10 rounded-xl bg-[#80cc1b] text-[#021851] flex items-center justify-center">
+                  <i data-lucide="repeat" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-sm font-extrabold text-[#021851]">Cuotas mensuales a tiendas</h4>
+                <p class="text-xs text-slate-600 leading-relaxed">Suscripción mensual a los inquilinos por operar y vender dentro del sistema del mall.</p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-2">
+                <div class="w-10 h-10 rounded-xl bg-[#80cc1b] text-[#021851] flex items-center justify-center">
+                  <i data-lucide="megaphone" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-sm font-extrabold text-[#021851]">Espacios promocionales</h4>
+                <p class="text-xs text-slate-600 leading-relaxed">Espacios destacados y banners premium dentro de la aplicación móvil.</p>
+              </div>
+
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border border-slate-200 space-y-2">
+                <div class="w-10 h-10 rounded-xl bg-[#80cc1b] text-[#021851] flex items-center justify-center">
+                  <i data-lucide="sparkles" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-sm font-extrabold text-[#021851]">Campañas patrocinadas</h4>
+                <p class="text-xs text-slate-600 leading-relaxed">Activaciones digitales y notificaciones push patrocinadas por marcas aliadas.</p>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-[#f2fae6] border border-[#80cc1b] text-center">
+              <p class="text-sm sm:text-base font-extrabold text-[#021851]">
+                "Ahora ya no solo alquilan espacios físicos. Monetizan también el canal digital."
+              </p>
+            </div>
+          </div>
+
+          <!-- Fidelización y Control del Cliente (4-Column Grid) -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+            <div>
+              <h3 class="text-lg font-extrabold text-[#021851]">Fidelización y Control del Cliente</h3>
+              <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                Cedaky Mall se convierte en dueño de su audiencia: acceso directo sin depender de terceros, comunicación inmediata e influencia en tiempo real.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="p-5 rounded-2xl bg-[#f4f7fb] border border-slate-200 space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-[#021851] text-[#fbd802] flex items-center justify-center">
+                  <i data-lucide="database" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-sm font-extrabold text-[#021851]">Base de datos propia</h4>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Registro de usuarios reales</li>
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Información de comportamiento de compra</li>
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Segmentación por intereses y hábitos</li>
+                </ul>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-[#f4f7fb] border border-slate-200 space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-[#016fe9] text-white flex items-center justify-center">
+                  <i data-lucide="bell-ring" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-sm font-extrabold text-[#021851]">Comunicación directa</h4>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Notificaciones push</li>
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Promociones personalizadas</li>
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Anuncios por eventos o temporadas</li>
+                </ul>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-[#f4f7fb] border border-slate-200 space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-[#fbd802] text-[#021851] flex items-center justify-center">
+                  <i data-lucide="target" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-sm font-extrabold text-[#021851]">Capacidad de influencia</h4>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Promocionar tiendas específicas</li>
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Dirigir tráfico hacia marcas concretas</li>
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Activar campañas en momentos clave</li>
+                </ul>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-[#f4f7fb] border border-slate-200 space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-[#80cc1b] text-[#021851] flex items-center justify-center">
+                  <i data-lucide="heart-handshake" class="w-5 h-5"></i>
+                </div>
+                <h4 class="text-sm font-extrabold text-[#021851]">Fidelización</h4>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Sistema de puntos por compra</li>
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Incentivos para regresar</li>
+                  <li class="flex items-start gap-1.5"><span class="text-[#016fe9] font-bold">•</span>Aumento en frecuencia de visitas y consumo</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visión a Futuro (4-Step Roadmap) -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+            <h3 class="text-lg font-extrabold text-[#021851] flex items-center gap-2">
+              <i data-lucide="milestone" class="w-5 h-5 text-[#016fe9]"></i>
+              <span>Visión a Futuro</span>
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border-t-4 border-t-[#016fe9] border-x border-b border-slate-200">
+                <span class="text-xs font-extrabold text-[#016fe9]">PASO 01</span>
+                <h4 class="text-sm font-extrabold text-[#021851] mt-1">Expansión a delivery</h4>
+                <p class="text-xs text-slate-600 mt-1">Entregas integradas desde las tiendas del mall hacia todo Puerto Plata.</p>
+              </div>
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border-t-4 border-t-[#016fe9] border-x border-b border-slate-200">
+                <span class="text-xs font-extrabold text-[#016fe9]">PASO 02</span>
+                <h4 class="text-sm font-extrabold text-[#021851] mt-1">Eventos y reservas</h4>
+                <p class="text-xs text-slate-600 mt-1">Integración de boletería, agenda comercial y reservas digitales.</p>
+              </div>
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border-t-4 border-t-[#fbd802] border-x border-b border-slate-200">
+                <span class="text-xs font-extrabold text-[#021851]">PASO 03</span>
+                <h4 class="text-sm font-extrabold text-[#021851] mt-1">Análisis de clientes</h4>
+                <p class="text-xs text-slate-600 mt-1">Inteligencia de datos sobre hábitos y frecuencia de compra.</p>
+              </div>
+              <div class="p-4 rounded-xl bg-[#f4f7fb] border-t-4 border-t-[#80cc1b] border-x border-b border-slate-200">
+                <span class="text-xs font-extrabold text-[#69aa13]">PASO 04</span>
+                <h4 class="text-sm font-extrabold text-[#021851] mt-1">Valor de marca</h4>
+                <p class="text-xs text-slate-600 mt-1">Crecimiento sostenido del valor del mall como marca líder.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- High-Impact Closing Banner (#021851 with #fbd802 & #80cc1b) -->
+          <div class="rounded-2xl bg-[#021851] text-white p-6 sm:p-8 shadow-md border-l-8 border-l-[#fbd802]">
+            <div class="max-w-4xl space-y-2.5">
+              <p class="text-xl sm:text-2xl font-extrabold leading-tight">
+                "Este proyecto no es un gasto. Es la <span class="text-[#80cc1b]">infraestructura digital del mall.</span>"
+              </p>
+              <p class="text-sm sm:text-base text-slate-200">
+                El <strong class="text-[#fbd802]">Plan Avanzado</strong> es el punto de entrada. El <strong class="text-[#80cc1b]">Plan Ilimitado</strong> es donde ocurre el crecimiento real.
+              </p>
+            </div>
+          </div>
+        </section>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        <!-- ============================================================
+             SECTION 6: COTIZACIONES Y CONTACTO
+        ============================================================= -->
+        <section id="section-cotizaciones" class="section-view space-y-6">
+
+          <!-- Header -->
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-[#016fe9]">Decisión y Siguientes Pasos</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#021851] mt-0.5">Cotizaciones y Contacto</h2>
+            <p class="text-sm text-slate-500 mt-1">Seleccione el plan o la comparativa completa para generar y descargar su cotización imprimible en PDF.</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+           <!-- Left: Interactive Plan Selector Cards -->
+            <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <h3 class="text-base font-extrabold text-[#021851]">Seleccione el Alcance de su Cotización</h3>
+                <button type="button" onclick="selectQuoteOption('Ambos Planes')" id="btn-both-plans" class="text-xs font-bold text-[#016fe9] hover:underline cursor-pointer">
+                  Incluir Ambos Planes
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Plan Avanzado Selector -->
+                <button type="button" onclick="selectQuoteOption('Plan Avanzado')" id="quote-card-avanzado" class="text-left p-5 rounded-2xl border-2 border-slate-200 hover:border-[#016fe9] transition-all cursor-pointer">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-[#016fe9]">Nivel 1</span>
+                    <span id="check-avanzado" class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center text-white"></span>
+                  </div>
+                  <h4 class="text-base font-extrabold text-[#021851]">Plan Avanzado</h4>
+                  <p class="text-xs text-slate-500 mt-1">Página web informativa con directorio · Reportes con analíticas semanal · SEO avanzado · Widget de chat interno · Asistencia IA.</p>
+                  <div class="mt-3 space-y-1">
+                    <p class="text-xs font-extrabold text-[#016fe9]">795 USD <span class="font-medium text-slate-500">configuración de cuenta</span></p>
+                    <p class="text-xs font-extrabold text-[#016fe9]">158.77 USD <span class="font-medium text-slate-500">/ mensual</span></p>
+                    <p class="text-[11px] text-slate-500">Renovación dominio + 1 correo comercial: USD 95/año</p>
+                    <p class="text-[11px] text-slate-500">Tiempo de entrega: 15 días laborables</p>
+                  </div>
+                </button>
+
+                <!-- Plan Ilimitado Selector -->
+                <button type="button" onclick="selectQuoteOption('Plan Ilimitado')" id="quote-card-ilimitado" class="text-left p-5 rounded-2xl border-2 border-[#016fe9] bg-[#e8f3ff]/40 transition-all cursor-pointer">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="px-2 py-0.5 rounded-full bg-[#fbd802] text-[#021851] text-[10px] font-extrabold uppercase">Recomendado</span>
+                    <span id="check-ilimitado" class="w-5 h-5 rounded-full border-2 border-[#016fe9] bg-[#016fe9] flex items-center justify-center text-white">
+                      <i data-lucide="check" class="w-3 h-3"></i>
+                    </span>
+                  </div>
+                  <h4 class="text-base font-extrabold text-[#021851]">Plan Ilimitado</h4>
+                  <p class="text-xs text-slate-500 mt-1">Artículos ilimitados · App móvil personalizada · Integración POS · Recuperación de carritos · Tarjetas regalo · Cupones · Pagos DOP vía Azul Dominicana · SEO avanzado · Chat interno · Asistencia IA.</p>
+                  <div class="mt-3 space-y-1">
+                    <p class="text-xs font-extrabold text-[#69aa13]">2500 USD <span class="font-medium text-slate-500">configuración de cuenta</span></p>
+                    <p class="text-xs font-extrabold text-[#69aa13]">450 USD <span class="font-medium text-slate-500">/ mensual</span></p>
+                    <p class="text-[11px] text-slate-500">Renovación dominio + 1 correo comercial: USD 95/año</p>
+                    <p class="text-[11px] text-slate-500">Acceso admin desde App Móvil y Desktop</p>
+                    <p class="text-[11px] text-slate-500">Tiempo de entrega: 30 días laborables</p>
+                  </div>
+                </button>
+              </div>
+
+              <!-- Selected Indicator + Action Buttons -->
+              <div class="p-3.5 rounded-xl bg-[#f4f7fb] border border-slate-200 flex items-center justify-between text-xs">
+                <span class="text-slate-500 font-medium">Selección actual:</span>
+                <span id="selected-plan-badge" class="font-extrabold text-[#021851]">Plan Ilimitado (Plataforma Comercial + App)</span>
+              </div>
+
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <button onclick="openQuoteModal()" class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#016fe9] hover:bg-[#0158bd] text-white text-sm font-extrabold shadow-md shadow-[#016fe9]/25 transition-all cursor-pointer">
+                  <i data-lucide="file-down" class="w-5 h-5"></i>
+                  <span>Descargar Cotizaciones</span>
+                </button>
+                <button onclick="navigateTo('planes')" class="px-5 py-3.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-[#021851] text-sm font-bold transition-colors cursor-pointer">
+                  Revisar Planes
+                </button>
+              </div>
+
+              <!-- Payment & Terms -->
+              <div class="pt-3 border-t border-slate-200 space-y-2">
+                <p class="text-xs text-slate-600 flex items-center gap-1.5">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-[#69aa13]"></i>
+                  Pago seguro con <span class="font-extrabold text-[#021851]">PayPal</span> 💳 · Precios en <span class="font-extrabold text-[#021851]">Dólares USD</span>
+                </p>
+                <p class="text-[11px] text-slate-500">
+                  Al cotizar acepta nuestros
+                  <a href="/terminos" target="_blank" rel="noopener noreferrer" class="text-[#016fe9] underline decoration-[#016fe9]/40 hover:decoration-[#016fe9] hover:text-[#021851] transition-colors">Términos y Condiciones</a>
+                  y nuestra
+                  <a href="/privacidad" target="_blank" rel="noopener noreferrer" class="text-[#016fe9] underline decoration-[#016fe9]/40 hover:decoration-[#016fe9] hover:text-[#021851] transition-colors">Política de Privacidad</a>.
+                </p>
+              </div>
+            </div>
+            
+            
+            
+
+            <!-- Right: Prospect Contact Card -->
+            <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-5">
+              <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-xl bg-[#021851] text-[#fbd802] flex items-center justify-center shrink-0">
+                    <i data-lucide="user-check" class="w-5 h-5"></i>
+                  </div>
+                  
+                  
+                  
+                  
+                  <div>
+                    <h3 class="text-base font-extrabold text-[#021851]">Contacto de ventas</h3>
+                    <p class="text-xs text-slate-500">Bebell Digital Solutions · Santo Domingo, R.D.</p>
+                  </div>
+                </div>
+
+                <div class="space-y-3 text-sm">
+                  <div class="flex items-start gap-3 p-3 rounded-xl bg-[#f4f7fb] border border-slate-200">
+                    <i data-lucide="user" class="w-4.5 h-4.5 text-[#016fe9] mt-0.5 shrink-0"></i>
+                    <div>
+                      <p class="text-xs font-semibold text-slate-500">Contacto</p>
+                      <p class="font-bold text-[#021851]">Anisia Domínguez</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3 p-3 rounded-xl bg-[#f4f7fb] border border-slate-200">
+                    <i data-lucide="phone" class="w-4.5 h-4.5 text-[#80cc1b] mt-0.5 shrink-0"></i>
+                    <div>
+                      <p class="text-xs font-semibold text-slate-500">Teléfono</p>
+                      <p class="font-bold text-[#021851]">+1-829-620-3970</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between gap-2 p-3 rounded-xl bg-[#f4f7fb] border border-slate-200">
+                    <div class="flex items-start gap-3 min-w-0">
+                      <i data-lucide="mail" class="w-4.5 h-4.5 text-[#016fe9] mt-0.5 shrink-0"></i>
+                      <div class="min-w-0">
+                        <p class="text-xs font-semibold text-slate-500">Correo Electrónico</p>
+                        <p class="font-bold text-[#021851] truncate">ventas@bebelldigitalsolutions.com</p>
+                      </div>
+                    </div>
+                    <button onclick="copyText('ventas@bebelldigitalsolutions.com')" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-[#016fe9] text-xs font-bold text-[#021851] hover:text-[#016fe9] transition-colors shrink-0 cursor-pointer">
+                      Copiar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Direct Action Buttons -->
+              <div class="grid grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
+                <a href="tel:+18296203970" class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-[#021851] hover:bg-[#0a2773] text-white text-xs font-bold transition-colors">
+                  <i data-lucide="phone" class="w-4 h-4 text-[#fbd802]"></i>
+                  <span>Llamar</span>
+                </a>
+                <a href="https://wa.me/18296203970" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-[#80cc1b] hover:bg-[#69aa13] text-[#021851] text-xs font-extrabold transition-colors">
+                  <i data-lucide="message-circle" class="w-4 h-4"></i>
+                  <span>WhatsApp</span>
+                </a>
+                <a href="mailto:ventas@bebelldigitalsolutions.com?subject=Propuesta%20Transformaci%C3%B3n%20Digital%20-%20Cedaky%20Mall" class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-[#016fe9] hover:bg-[#0158bd] text-white text-xs font-bold transition-colors">
+                  <i data-lucide="send" class="w-4 h-4"></i>
+                  <span>Correo</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <!-- ==================== PRINTABLE PDF QUOTE MODAL ==================== -->
+  <div id="quote-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-[#021851]/70 backdrop-blur-xs">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <!-- Modal Top Bar -->
+      <div class="px-6 py-4 bg-[#021851] text-white flex items-center justify-between no-print">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-[#fbd802] text-[#021851] flex items-center justify-center">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-extrabold">Cotización Ejecutiva — Cedaky Mall</h3>
+            <p class="text-xs text-slate-300">Lista para imprimir o guardar como PDF</p>
+          </div>
+        </div>
+        <button onclick="closeQuoteModal()" class="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" aria-label="Cerrar modal">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Printable Quote Area -->
+      <div id="printable-quote-area" class="p-6 sm:p-8 overflow-y-auto space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b-2 border-[#021851] pb-4">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full bg-[#fbd802] text-[#021851] text-[11px] font-extrabold mb-1.5">COTIZACIÓN COMERCIAL</span>
+            <h4 class="text-xl font-extrabold text-[#021851]">Cedaky Mall — Transformación Digital</h4>
+            <p class="text-xs text-slate-500 mt-0.5">Avenida Manolo Tavares Justo, Puerto Plata, Rep. Dom.</p>
+          </div>
+          <div class="text-xs text-slate-700 sm:text-right space-y-0.5">
+            <p><strong>Atención:</strong> Carla Finke Rivera</p>
+            <p><strong>Tel.:</strong> 809-919-7379</p>
+            <p><strong>Email:</strong> paseodelcedro@gmail.com</p>
+            <p id="quote-date-label" class="text-slate-400 pt-1"></p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[#e8f3ff] border border-[#016fe9]/30 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p class="text-[11px] font-extrabold uppercase tracking-wider text-[#016fe9]">Alcance Seleccionado</p>
+            <p id="modal-selected-plan" class="text-base sm:text-lg font-extrabold text-[#021851]">Plan Ilimitado (Plataforma Comercial + App)</p>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-[#80cc1b] text-[#021851] text-xs font-extrabold">Propuesta Vigente</span>
+        </div>
+
+        <!-- Dynamic Plan Details inside Modal -->
+        <div id="modal-plans-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div id="modal-box-avanzado" class="p-4 rounded-xl border border-[#016fe9]/40 bg-white space-y-2">
+            <h5 class="font-extrabold text-[#021851] text-sm">Plan 1: Plan Avanzado</h5>
+            <p class="text-[#016fe9] font-bold">Presencia + Organización</p>
+            <ul class="space-y-1 text-slate-700 list-disc list-inside">
+              <li>Página web informativa con directorio</li>
+              <li>Reportes con analíticas semanal</li>
+              <li>SEO avanzado</li>
+              <li>Widget de chat interno</li>
+              <li>Asistencia IA</li>
+            </ul>
+            <div class="mt-3 pt-2 border-t border-slate-200 space-y-0.5">
+              <p class="text-[#016fe9] font-extrabold">795 USD <span class="font-medium text-slate-500">configuración de cuenta</span></p>
+              <p class="text-[#016fe9] font-extrabold">158.77 USD <span class="font-medium text-slate-500">/ mensual</span></p>
+              <p class="text-slate-500">Renovación dominio + 1 correo comercial: USD 95/año</p>
+              <p class="text-slate-500">Tiempo de entrega: 15 días laborables</p>
+            </div>
+          </div>
+
+          <div id="modal-box-ilimitado" class="p-4 rounded-xl border-2 border-[#021851] bg-[#f4f7fb] space-y-2">
+            <div class="flex items-center justify-between">
+              <h5 class="font-extrabold text-[#021851] text-sm">Plan 2: Plan Ilimitado + App</h5>
+              <span class="px-2 py-0.5 rounded-full bg-[#fbd802] text-[#021851] text-[10px] font-extrabold">Recomendado</span>
+            </div>
+            <p class="text-[#69aa13] font-extrabold">Ventas + Data + Más Control</p>
+            <ul class="space-y-1 text-slate-700 list-disc list-inside">
+              <li>Artículos ilimitados</li>
+              <li>App móvil personalizada</li>
+              <li>Integración POS</li>
+              <li>Prioridad en soporte</li>
+              <li>Recuperación de carritos</li>
+              <li>Tarjetas regalo y cupones de descuento</li>
+              <li>Pagos en DOP vía Azul Dominicana</li>
+              <li>SEO avanzado, chat interno y asistencia IA</li>
+              <li>Acceso admin desde App Móvil y Desktop</li>
+            </ul>
+            <div class="mt-3 pt-2 border-t border-slate-200 space-y-0.5">
+              <p class="text-[#69aa13] font-extrabold">2500 USD <span class="font-medium text-slate-500">configuración de cuenta</span></p>
+              <p class="text-[#69aa13] font-extrabold">450 USD <span class="font-medium text-slate-500">/ mensual</span></p>
+              <p class="text-slate-500">Renovación dominio + 1 correo comercial: USD 95/año</p>
+              <p class="text-slate-500">Tiempo de entrega: 30 días laborables</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-600 border-t border-slate-200 pt-4">
+          <strong class="text-[#021851]">Recomendación complementaria:</strong> Implementar correos corporativos con <a href="https://www.mailerbox.com/" target="_blank" rel="noopener noreferrer" class="text-[#016fe9] underline decoration-[#016fe9]/40 hover:decoration-[#016fe9] hover:text-[#021851] transition-colors font-bold">MailerBox</a> y atención multicanal con <a href="https://www.helpdesk.com/" target="_blank" rel="noopener noreferrer" class="text-[#016fe9] underline decoration-[#016fe9]/40 hover:decoration-[#016fe9] hover:text-[#021851] transition-colors font-bold">HelpDesk</a>.
+        </p>
+
+        <div class="pt-2 border-t border-slate-200 space-y-1.5">
+          <p class="text-xs text-slate-600 flex items-center gap-1.5">
+            <i data-lucide="shield-check" class="w-4 h-4 text-[#69aa13]"></i>
+            Pago seguro con <strong class="text-[#021851]">PayPal</strong> 💳 · Precios en <strong class="text-[#021851]">Dólares USD</strong>
+          </p>
+          <p class="text-[11px] text-slate-500">
+            Al aceptar esta cotización confirma haber leído nuestros
+            <a href="/terminos" target="_blank" rel="noopener noreferrer" class="text-[#016fe9] underline decoration-[#016fe9]/40 hover:decoration-[#016fe9] hover:text-[#021851] transition-colors">Términos y Condiciones</a>
+            y nuestra
+            <a href="/privacidad" target="_blank" rel="noopener noreferrer" class="text-[#016fe9] underline decoration-[#016fe9]/40 hover:decoration-[#016fe9] hover:text-[#021851] transition-colors">Política de Privacidad</a>.
+          </p>
+        </div>
+      </div>
+      
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-slate-200 bg-[#f4f7fb] flex items-center justify-end gap-3 no-print">
+        <button onclick="closeQuoteModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-[#021851] hover:bg-white text-sm font-bold transition-colors cursor-pointer">
+          Cerrar
+        </button>
+        <button onclick="printQuote()" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#016fe9] hover:bg-[#0158bd] text-white text-sm font-extrabold shadow-sm transition-all cursor-pointer">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Imprimir / Guardar PDF</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <!-- ==================== MÁS FOTOS GALLERY MODAL ==================== -->
+  <div id="gallery-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-[#021851]/75 backdrop-blur-xs">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-3xl w-full overflow-hidden">
+      <div class="px-6 py-4 bg-[#021851] text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="images" class="w-5 h-5 text-[#fbd802]"></i>
+          <h3 class="text-sm sm:text-base font-extrabold">Galería del Proyecto — Cedaky Mall</h3>
+        </div>
+        <button onclick="closeGalleryModal()" class="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 cursor-pointer" aria-label="Cerrar galería">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#f4f7fb]">
+        <div class="rounded-xl overflow-hidden border border-slate-200 bg-white">
+          <img src="https://placehold.co/600x360/021851/fbd802?text=Fachada+Principal+31,000+m2" alt="Fachada Principal Cedaky Mall" class="w-full h-44 object-cover" />
+          <p class="p-3 text-xs font-bold text-[#021851]">Fachada Principal · Av. Manolo Tavares Justo</p>
+        </div>
+        <div class="rounded-xl overflow-hidden border border-slate-200 bg-white">
+          <img src="https://placehold.co/600x360/016fe9/ffffff?text=Area+Rentable+GLA+18,200+m2" alt="Área Rentable Cedaky Mall" class="w-full h-44 object-cover" />
+          <p class="p-3 text-xs font-bold text-[#021851]">Pasillos Comerciales · 18,200 m² GLA</p>
+        </div>
+        <div class="rounded-xl overflow-hidden border border-slate-200 bg-white">
+          <img src="https://placehold.co/600x360/80cc1b/021851?text=16+Inquilinos+en+Comercializacion" alt="Inquilinos Cedaky Mall" class="w-full h-44 object-cover" />
+          <p class="p-3 text-xs font-bold text-[#021851]">Locales y Tiendas Activas · 16 Tenants</p>
+        </div>
+        <div class="rounded-xl overflow-hidden border border-slate-200 bg-white">
+          <img src="https://placehold.co/600x360/fbd802/021851?text=120+Parqueos+y+Areas+Comunes" alt="Parqueos Cedaky Mall" class="w-full h-44 object-cover" />
+          <p class="p-3 text-xs font-bold text-[#021851]">Estacionamientos (120) y Áreas Comunes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2.5 px-4 py-3 rounded-xl bg-[#021851] text-white text-xs sm:text-sm font-semibold shadow-xl border border-[#80cc1b]/50">
+    <i data-lucide="check-circle" class="w-4 h-4 text-[#80cc1b]"></i>
+    <span id="toast-message">Acción completada</span>
+  </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    let selectedQuotePlan = 'Plan Ilimitado';
+    let contrastChartInstance = null;
+
+    /**
+     * Updates the real-time Spanish date and clock every second.
+     */
+    function updateLiveClock() {
+      try {
+        const now = new Date();
+        const dateFormatter = new Intl.DateTimeFormat('es-DO', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+        const timeFormatter = new Intl.DateTimeFormat('es-DO', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true,
+        });
+
+        let formattedDate = dateFormatter.format(now);
+        formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+        const formattedTime = timeFormatter.format(now).toUpperCase();
+
+        const clockEl = document.getElementById('live-clock');
+        if (clockEl) clockEl.textContent = `${formattedDate} · ${formattedTime}`;
+
+        const quoteDateEl = document.getElementById('quote-date-label');
+        if (quoteDateEl) quoteDateEl.textContent = `Fecha: ${formattedDate}`;
+      } catch (err) {
+        console.error('Error actualizando fecha y hora:', err);
+      }
+    }
+
+    /**
+     * Switches smoothly between the 6 dashboard sections.
+     * Active state uses #016fe9 background with #fbd802 left accent bar.
+     */
+    function navigateTo(sectionId) {
+      document.querySelectorAll('.section-view').forEach((sec) => {
+        sec.classList.remove('active');
+      });
+
+      const target = document.getElementById(`section-${sectionId}`);
+      if (target) target.classList.add('active');
+
+      document.querySelectorAll('.nav-item').forEach((btn) => {
+        const isActive = btn.getAttribute('data-nav') === sectionId;
+        if (isActive) {
+          btn.classList.add('bg-[#016fe9]', 'text-white', 'border-l-[#fbd802]', 'shadow-md');
+          btn.classList.remove('text-slate-300', 'hover:bg-white/10', 'hover:text-white', 'border-transparent');
+        } else {
+          btn.classList.remove('bg-[#016fe9]', 'text-white', 'border-l-[#fbd802]', 'shadow-md');
+          btn.classList.add('text-slate-300', 'hover:bg-white/10', 'hover:text-white', 'border-transparent');
+        }
+      });
+
+      toggleMobileSidebar(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * Opens or closes the mobile sidebar drawer.
+     */
+    function toggleMobileSidebar(show) {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (!sidebar || !backdrop) return;
+
+      if (show) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Initializes the Chart.js horizontal bar chart using the 4 brand colors.
+     */
+    function initContrastChart() {
+      try {
+        const canvas = document.getElementById('contrastChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        if (contrastChartInstance) contrastChartInstance.destroy();
+
+        contrastChartInstance = new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: [
+              'Infraestructura (31k m²)',
+              'Área Rentable (18.2k m²)',
+              'Identidad de Marca',
+              'SEO & Google Business',
+              'Directorio & Captación Web',
+            ],
+            datasets: [
+              {
+                label: 'Magnitud Física / Potencial',
+                data: [96, 92, 90, 95, 94],
+                backgroundColor: ['#80cc1b', '#80cc1b', '#016fe9', '#016fe9', '#016fe9'],
+                borderRadius: 6,
+                barPercentage: 0.72,
+              },
+              {
+                label: 'Madurez Digital Actual',
+                data: [28, 22, 32, 25, 10],
+                backgroundColor: '#fbd802',
+                borderColor: '#021851',
+                borderWidth: 1,
+                borderRadius: 6,
+                barPercentage: 0.72,
+              },
+            ],
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#021851',
+                titleColor: '#fbd802',
+                bodyColor: '#ffffff',
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: {
+                  label: (ctx) => `${ctx.dataset.label}: ${ctx.raw}/100`,
+                },
+              },
+            },
+            scales: {
+              x: {
+                max: 100,
+                grid: { color: '#e2e8f0' },
+                ticks: { font: { family: 'Inter', size: 11 }, color: '#475569' },
+              },
+              y: {
+                grid: { display: false },
+                ticks: { font: { family: 'Inter', size: 11, weight: '600' }, color: '#021851' },
+              },
+            },
+          },
+        });
+      } catch (err) {
+        console.error('Error inicializando el gráfico:', err);
+      }
+    }
+
+    /**
+     * Selects a plan option for the printable quote modal.
+     */
+    function selectQuoteOption(planName) {
+      selectedQuotePlan = planName;
+      const cardAv = document.getElementById('quote-card-avanzado');
+      const cardIl = document.getElementById('quote-card-ilimitado');
+      const checkAv = document.getElementById('check-avanzado');
+      const checkIl = document.getElementById('check-ilimitado');
+      const badge = document.getElementById('selected-plan-badge');
+
+      const setCardState = (card, check, active) => {
+        if (!card || !check) return;
+        if (active) {
+          card.classList.add('border-[#016fe9]', 'bg-[#e8f3ff]/40');
+          card.classList.remove('border-slate-200');
+          check.classList.add('border-[#016fe9]', 'bg-[#016fe9]');
+          check.classList.remove('border-slate-300');
+          check.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i>';
+        } else {
+          card.classList.remove('border-[#016fe9]', 'bg-[#e8f3ff]/40');
+          card.classList.add('border-slate-200');
+          check.classList.remove('border-[#016fe9]', 'bg-[#016fe9]');
+          check.classList.add('border-slate-300');
+          check.innerHTML = '';
+        }
+      };
+
+      if (planName === 'Plan Avanzado') {
+        setCardState(cardAv, checkAv, true);
+        setCardState(cardIl, checkIl, false);
+        if (badge) badge.textContent = 'Plan Avanzado (Plataforma Web Informativa)';
+      } else if (planName === 'Plan Ilimitado') {
+        setCardState(cardAv, checkAv, false);
+        setCardState(cardIl, checkIl, true);
+        if (badge) badge.textContent = 'Plan Ilimitado (Plataforma Comercial + App)';
+      } else {
+        setCardState(cardAv, checkAv, true);
+        setCardState(cardIl, checkIl, true);
+        if (badge) badge.textContent = 'Comparativa Completa (Plan Avanzado + Plan Ilimitado)';
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function selectPlanAndOpenQuote(planName) {
+      selectQuoteOption(planName);
+      openQuoteModal();
+    }
+
+    /**
+     * Opens the printable PDF quote modal tailored to the selected plan.
+     */
+    function openQuoteModal() {
+      const modal = document.getElementById('quote-modal');
+      const label = document.getElementById('modal-selected-plan');
+      const boxAv = document.getElementById('modal-box-avanzado');
+      const boxIl = document.getElementById('modal-box-ilimitado');
+      const grid = document.getElementById('modal-plans-grid');
+
+      if (selectedQuotePlan === 'Plan Avanzado') {
+        if (label) label.textContent = 'Plan Avanzado (Plataforma Web Informativa)';
+        boxAv.classList.remove('hidden');
+        boxIl.classList.add('hidden');
+        grid.classList.remove('sm:grid-cols-2');
+      } else if (selectedQuotePlan === 'Plan Ilimitado') {
+        if (label) label.textContent = 'Plan Ilimitado (Plataforma Comercial Completa + App)';
+        boxAv.classList.add('hidden');
+        boxIl.classList.remove('hidden');
+        grid.classList.remove('sm:grid-cols-2');
+      } else {
+        if (label) label.textContent = 'Ambos Planes (Plan Avanzado + Plan Ilimitado)';
+        boxAv.classList.remove('hidden');
+        boxIl.classList.remove('hidden');
+        grid.classList.add('sm:grid-cols-2');
+      }
+
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeQuoteModal() {
+      const modal = document.getElementById('quote-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function openGalleryModal() {
+      const modal = document.getElementById('gallery-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeGalleryModal() {
+      const modal = document.getElementById('gallery-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function printQuote() {
+      window.print();
+      showToast('Preparando documento de cotización para imprimir / PDF.');
+    }
+
+    /**
+     * Copies text using document.execCommand for iFrame compatibility.
+     */
+    function copyText(text) {
+      try {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = text;
+        tempInput.style.position = 'fixed';
+        tempInput.style.opacity = '0';
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        showToast(`Copiado al portapapeles: ${text}`);
+      } catch (err) {
+        console.error('Error al copiar:', err);
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toast-message');
+      if (!toast || !msgEl) return;
+      msgEl.textContent = message;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 3000);
+    }
+
+    // Boot dashboard on DOM ready
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      // Ensure cached logo image reliably unhides and replaces fallback badge
+      const logoImg = document.getElementById('prospect-logo');
+      const logoFallback = document.getElementById('logo-fallback');
+      if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+        logoImg.classList.remove('hidden');
+        if (logoFallback) logoFallback.classList.add('hidden');
+      }
+
+      updateLiveClock();
+      setInterval(updateLiveClock, 1000);
+      navigateTo('resumen');
+      initContrastChart();
+    });
+  </script>
+</body>
+</html>
